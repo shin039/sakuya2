@@ -1,0 +1,13 @@
+# Local Settings
+package-lock.json
+
+# DB Temp
+.pgsql_data/
+
+# DB TestData
+pgsql_sql/9*.sql
+
+# dotenv environment variables file
+.env
+.env.test
+.env.local

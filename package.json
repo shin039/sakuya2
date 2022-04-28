@@ -1,0 +1,16 @@
+{
+  "name": "CommandLauncher",
+  "version": "1.0.0",
+  "private": true,
+  "description": "for command",
+  "scripts": {
+    "---db"   : "-- DB Script ------------------------------------------------------------",
+    "startdb" : "docker-compose -f ./docker_db/postgresql.yml --env-file .env up -d",
+    "stopdb"  : "docker-compose -f ./docker_db/postgresql.yml --env-file .env down",
+    "logindb" : "docker exec -it postgresql bash",
+    "cleandb" : "npm run stopdb && rm -rf ./docker_db/.pgsql_data",
+    "----sv"  : "-------------------------------------------------------------------------",
+    "startsv" : "cd serverside && pipenv run start",
+    "---end"  : "-------------------------------------------------------------------------"
+  }
+}

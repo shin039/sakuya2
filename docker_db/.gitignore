@@ -1,0 +1,6 @@
+# DB Temp
+.pgsql_data/
+
+# DB TestData
+/pgsql_sql/9*.sql
+

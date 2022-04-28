@@ -1,5 +1,6 @@
-from flask import Blueprint
-from flask import request, make_response
+from flask              import Blueprint
+from flask              import request, make_response
+from flask_jwt_extended import create_access_token, set_access_cookies
 
 bp = Blueprint('login', __name__, url_prefix='/login')
 
@@ -8,4 +9,13 @@ bp = Blueprint('login', __name__, url_prefix='/login')
 #        -> てことは、ログイン情報の保持が必要。履歴もあった方が良いし、テーブル作成するか。
 @bp.route('/', methods=['GET'])
 def login():
-  return make_response(f'login parser:)  [METHOD => {request.method}]');
+  # TODO POSTに分ける
+  # JWT アクセストークンを作成する。
+  access_token = create_access_token(identity='test_user')
+
+  response = make_response(f'login parser:)  [METHOD => {request.method}], Token => {access_token}')
+
+  # アクセストークンをCookieに設定する。
+  # DEBUG set_access_cookies(response, access_token)
+
+  return response, 200

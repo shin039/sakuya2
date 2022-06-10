@@ -16,6 +16,6 @@ def login():
   response = make_response(f'login parser:)  [METHOD => {request.method}], Token => {access_token}')
 
   # アクセストークンをCookieに設定する。
-  # DEBUG set_access_cookies(response, access_token)
+  set_access_cookies(response, access_token)
 
   return response, 200

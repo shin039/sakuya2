@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS t_transaction_log (
   process_date      date    NOT NULL,
   process_time      time    NOT NULL,
   staff_id          integer NOT NULL,
+  kind              integer NOT NULL, -- EX) 1: regist, 2: update, 3: delete ...
   process           text    NOT NULL
 );
 

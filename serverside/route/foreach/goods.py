@@ -14,24 +14,23 @@ from db.database        import DBManager
 bp = Blueprint('goods', __name__, url_prefix='/goods')
 
 # ------------------------------------------------------------------------------
-# リストデータ取得
+# List Data: Select
 # ------------------------------------------------------------------------------
 @bp.route("/", methods=['GET'])
 @jwt_required()
 def goods():
-  # TODO: SQLをきちんと。
-  result   = DBManager.select('SELECT * FROM m_goods ORDER BY goods_id;')
+  result   = DBManager.select('SELECT * FROM m_goods ORDER BY goods_id;', ())
   response = {'result': result}
 
   return make_response(jsonify(response))
 
 # ------------------------------------------------------------------------------
-# 詳細データ取得
+# Detail Data: Select
 # ------------------------------------------------------------------------------
 @bp.route("/<goods_id>", methods=['GET', 'POST', 'PUT', 'DELETE']) # PUT => IDを伴うINSERT, POST => IDを伴わないINSERT
 @jwt_required()
 def goods_detail(goods_id):
-    # NOTE: request オブジェクトの仕様確認
+  # NOTE: request オブジェクトの仕様確認
   print(f'METHOD => {request.method}')
   print(f'DATA   => {request.get_data()}')
   
@@ -39,8 +38,15 @@ def goods_detail(goods_id):
   #data = request.get_json()
   #text = data['post_text']
 
-  # NOTE: flaskの仕様確認
-  response = {'result': f'goods response. {goods_id}'}
+  result   = DBManager.select('SELECT * FROM m_goods WHERE goods_id = %s;', (str(goods_id),) ) # , はtupleとして認識させるため
+  response = {'result': result}
 
   return make_response(jsonify(response))
 
+# ------------------------------------------------------------------------------
+# TODO Detail Data: Update
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
+# TODO Detail Data: Delete
+# ------------------------------------------------------------------------------

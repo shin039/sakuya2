@@ -24,6 +24,6 @@ class DBManager():
 
   # Create DataBase Class and return.
   @classmethod
-  def select(cls, sql):
-    return DBManager.__config().select(sql)
+  def select(cls, sql, tp_param):
+    return DBManager.__config().select(sql, tp_param)
      

@@ -1,16 +1,15 @@
 # ------------------------------------------------------------------------------
 # DB Connect & Transaction For PostgreSQL
 # ------------------------------------------------------------------------------
-from os                   import getenv
-import psycopg2
-import psycopg2.extras
+from os       import getenv
+from psycopg2 import connect, extras
 
 class PostgreSQL():
 
   # ----------------------------------------------------------------------------
   # Create Connection URL
   # ----------------------------------------------------------------------------
-  def createConnectionURL(self):
+  def __createConnectionURL(self):
     dbhost = getenv('DB_HOST')
     dbport = getenv('DB_PORT')
     dbuser = getenv('DB_USER')
@@ -21,13 +20,13 @@ class PostgreSQL():
   # ----------------------------------------------------------------------------
   # Select
   # ----------------------------------------------------------------------------
-  def select(self, query):
+  def select(self, query, tp_param):
 
-    db_url = self.createConnectionURL()
+    db_url = self.__createConnectionURL()
 
-    with psycopg2.connect(db_url) as conn:
-      with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cur:
-        cur.execute(query)
+    with connect(db_url) as conn:
+      with conn.cursor(cursor_factory=extras.DictCursor) as cur:
+        cur.execute(query, tp_param)
         results = cur.fetchall()
 
         dict_result = []

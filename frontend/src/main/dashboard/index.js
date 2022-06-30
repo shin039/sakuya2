@@ -1,7 +1,6 @@
 // -----------------------------------------------------------------------------
 // Import
 // -----------------------------------------------------------------------------
-import * as React                             from 'react';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import CssBaseline                            from '@mui/material/CssBaseline';
 import Box                                    from '@mui/material/Box';
@@ -13,8 +12,8 @@ import Chart                                  from './Chart';
 import Deposits                               from './Deposits';
 import Orders                                 from './Orders';
 
-import SkMenu  from 'main/menu/GeneralMenu';
-import CopyRight from 'main/common/html_copyright';
+import GeneralMenu from 'component/GeneralMenu';
+import CopyRight   from 'component/CopyRight';
 
 // -----------------------------------------------------------------------------
 // Function
@@ -30,7 +29,7 @@ const DashboardContent = () => {
     <ThemeProvider theme={mdTheme}>
       <Box sx={{ display: 'flex' }}>
         <CssBaseline />
-        <SkMenu/>
+        <GeneralMenu/>
 
         <Box
           component="main"

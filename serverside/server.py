@@ -7,6 +7,7 @@ from os        import getenv, sep
 from sys       import stderr
 from glob      import glob
 from importlib import import_module
+from csv       import reader
 
 # flask
 from flask              import Flask
@@ -33,7 +34,6 @@ IS_DEV     = (ENV != PRODUCTION)
 # NOTE: 環境変数一覧
 #for key, val in environ.items():
 #    print('{key}: {val}')
-
 print(f'# This Server Starting {ENV} Mode')
 
 # ------------------------------------------------------------------------------
@@ -41,8 +41,14 @@ print(f'# This Server Starting {ENV} Mode')
 # ------------------------------------------------------------------------------
 app = Flask(__name__, static_folder="./build/static", template_folder="./build")
 
+# Strict Slashes to Flase
+#  -> For CORS, when OPTION reauest redirect 308
+app.url_map.strict_slashes = False
+
 # Cross Origin Resource Sharing
-CORS(app) 
+ORIGINS = getenv('APP_FRONT_URL').split(',')
+print(f'# CORS Allow URL is {ORIGINS}')
+CORS(app, supports_credentials=True, origins=ORIGINS) 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 # JWT Settings
@@ -133,4 +139,6 @@ if __name__ == "__main__":
     app.env   = ENV
 
   # To Set .env, host and port
+  # TODO
+  #app.run(host='0.0.0.0', port=5000)
   app.run(host='127.0.0.1', port=5000)

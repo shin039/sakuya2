@@ -10,11 +10,12 @@ class PostgreSQL():
   # Create Connection URL
   # ----------------------------------------------------------------------------
   def __createConnectionURL(self):
-    dbhost = getenv('DB_HOST')
-    dbport = getenv('DB_PORT')
-    dbuser = getenv('DB_USER')
-    dbpass = getenv('DB_PASS')
-    dbname = getenv('DB_NAME')
+    dbhost = getenv('APP_DB_HOST')
+    dbport = getenv('APP_DB_PORT')
+    dbuser = getenv('APP_DB_USER')
+    dbpass = getenv('APP_DB_PASS')
+    dbname = getenv('APP_DB_NAME')
+
     return f"postgresql://{dbuser}:{dbpass}@{dbhost}:{dbport}/{dbname}"
 
   # ----------------------------------------------------------------------------

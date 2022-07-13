@@ -68,6 +68,7 @@ jwt = JWTManager(app);
 # - - - - - - - - - - - - - - 
 @app.after_request
 def refresh_expiring_jwts(response):
+
   try:
     exp_timestamp = get_jwt()["exp"]
     now = datetime.now(timezone.utc)
@@ -88,20 +89,20 @@ def refresh_expiring_jwts(response):
 # 期限切れ
 @jwt.expired_token_loader
 def jwt_expired_token_callback(e, unknown):
-    return jsonify({
-        'status'   : 401,
-        'sub_staus': 1,
-        'msg': 'The token has expired',
-    }), 401
+  return jsonify({
+      'status'   : 401,
+      'sub_staus': 1,
+      'msg': 'The token has expired',
+  }), 401
 
 # 未認証
 @jwt.unauthorized_loader
 def jwt_unauthorized_token_callback(e):
-    return jsonify({
-        'status': 401,
-        'sub_status': 2,
-        'msg': 'The token has unauthorized',
-    }), 401
+  return jsonify({
+      'status': 401,
+      'sub_status': 2,
+      'msg': 'The token has unauthorized',
+  }), 401
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 # Error Handler Settings

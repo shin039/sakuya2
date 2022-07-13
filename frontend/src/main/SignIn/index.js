@@ -37,26 +37,26 @@ export default function SignIn() {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    const data      = new FormData(event.currentTarget);
-    const email     = data.get('email');
-    const password  = data.get('password');
+    const data     = new FormData(event.currentTarget);
+    const userid   = data.get('userid');
+    const password = data.get('password');
 
     const f_success = response => {
       // ログイン情報をコンテクストに設定
-      ctx_user.setUserInfo({username: email});
+      ctx_user.setUserInfo({userid: userid});
 
       // ログイン情報をCookieにも設定
       //   -> F5やURL直打ちへの対策。コンテクストはクリアされてしまうので。
       const cookie_val = cookie._sakuya || {};
       cookie_val.userInfo = {...cookie_val.userInfo}
-      cookie_val.userInfo.username = email;
-      setCookie('_sakuya', cookie_val);
+      cookie_val.userInfo.userid = userid;
+      setCookie('_sakuya', cookie_val, {sameSite: 'Lax'});
 
       // メインページへの遷移
       navigate('/main');
     }
     
-    apiPost({url: 'login', o_params:{email, password}, f_success});
+    apiPost({url: 'login', o_params:{userid, password}, f_success});
   };
 
   return (
@@ -73,10 +73,10 @@ export default function SignIn() {
               margin="normal"
               required
               fullWidth
-              id="email"
-              label="Email Address"
-              name="email"
-              autoComplete="email"
+              id="userid"
+              label="User Id"
+              name="userid"
+              autoComplete="userid"
               autoFocus
             />
             <TextField

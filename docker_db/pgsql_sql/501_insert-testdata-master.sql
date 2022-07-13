@@ -3,6 +3,7 @@
 -- ============================================================================
 
 -- m_staff
+-- NOTE:`DB生成後、一度下記SQLを手動実行してInsertしなおさないと、パスワード認証が上手く通らない。
 INSERT INTO m_staff
   (userid , passwd                              , name             , birthday     , tel  , mail , is_delete , regist_staff , regist_time)
 VALUES

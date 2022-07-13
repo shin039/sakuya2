@@ -14,7 +14,7 @@ import Divider                               from '@mui/material/Divider';
 import List                                  from '@mui/material/List';
 import MenuIcon                              from '@mui/icons-material/Menu';
 import Badge                                 from '@mui/material/Badge';
-import { mainListItems, secondaryListItems } from './listItems';
+import { mainListItems, secondaryListItems } from 'component/DisplayFrame/GeneralMenu/listItems';
 
 // -----------------------------------------------------------------------------
 // Function & Static Variable
@@ -70,43 +70,23 @@ const GeneralMenu = (props) => {
   const [open, setOpen] = React.useState(false);
   const toggleDrawer = () => { setOpen(!open); };
 
+  const {title} = props;
+
   return (
     <>
       {/* Head Up Menu */}
       <AppBar position="absolute" open={open}>
-        <Toolbar
-          sx={{
-            pr: '24px', // keep right padding when drawer closed
-          }}
-        >
-          <IconButton
-            edge="start"
-            color="inherit"
-            aria-label="open drawer"
-            onClick={toggleDrawer}
-            sx={{
-              marginRight: '36px',
-              ...(open && { display: 'none' }),
-            }}
-          >
+        <Toolbar sx={{ pr: '24px', /* keep right padding when drawer closed */ }} >
+          <IconButton edge="start" color="inherit" aria-label="open drawer" onClick={toggleDrawer} sx={{ marginRight: '36px', ...(open && { display: 'none' }), }} >
             <MenuIcon />
           </IconButton>
 
-          <Typography
-            component="h1"
-            variant="h6"
-            color="inherit"
-            noWrap
-            sx={{ flexGrow: 1 }}
-          >
-            Dashboard
+          <Typography component="h1" variant="h6" color="inherit" noWrap sx={{ flexGrow: 1 }} >
+            {title}
           </Typography>
 
-          <IconButton color="inherit">
-            <Badge badgeContent={4} color="secondary">
-              <NotificationsIcon />
-            </Badge>
-          </IconButton>
+          {/* Notice */}
+          <IconButton color="inherit"> <Badge badgeContent={4} color="secondary"> <NotificationsIcon /> </Badge> </IconButton>
 
         </Toolbar>
       </AppBar>
@@ -114,17 +94,12 @@ const GeneralMenu = (props) => {
       {/* Side Menu */}
       <Drawer variant="permanent" open={open}>
         {/* 上部 */}
-        <Toolbar
-          sx={{
-            display       : 'flex',
-            alignItems    : 'center',
-            justifyContent: 'flex-end',
-            px            : [1],
-          }}
-        >
+        <Toolbar sx={{ display       : 'flex', alignItems    : 'center', justifyContent: 'flex-end', px            : [1], }} >
           <IconButton onClick={toggleDrawer}><ChevronLeftIcon/></IconButton>
         </Toolbar>
+
         <Divider />
+
         {/* Bussiness Menu */}
         <List component="nav">
           {mainListItems}

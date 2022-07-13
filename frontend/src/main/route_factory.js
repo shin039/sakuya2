@@ -10,21 +10,22 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
 import { CookiesProvider, useCookies  } from "react-cookie";
 
 // Business Components
-import SignIn    from 'main/SignIn';
-import DashBoard from 'main/Dashboard';
+import SignIn       from 'main/SignIn';
+import DashBoard    from 'main/Dashboard';
+import BarcodePrint from 'main/BarcodePrint';
 
 // -----------------------------------------------------------------------------
 // Context Data
 // -----------------------------------------------------------------------------
 const _ctx_userdata = {
-  userInfo   : {username: null},
+  userInfo   : {userid: null},
   setUserInfo: () => {}
 }
 
 export const CTX_USER = React.createContext(_ctx_userdata);
 
 export const USE_CONTEXT = () => {
-  const [userInfo, setUserInfo] = React.useState({username: null});
+  const [userInfo, setUserInfo] = React.useState({userid: null});
   return {userInfo, setUserInfo};
 }
 
@@ -41,15 +42,15 @@ const RouteFactory = (props) => {
 
   // Check Login Info
   // Not Set UserInfo in  Context Val, F5 or URL Direct Access
-  if(ctx_user && ctx_user.userInfo && ! ctx_user.userInfo.username){
+  if(ctx_user && ctx_user.userInfo && ! ctx_user.userInfo.userid){
     // Set Cookie UserInfo
     if(cookie && cookie._sakuya && cookie._sakuya.userInfo){
-       ctx_user.setUserInfo({username: cookie._sakuya.userInfo.username});
+       ctx_user.setUserInfo({userid: cookie._sakuya.userInfo.userid});
     }
   }
 
   // Functions
-  const isAuthOK = !!ctx_user.userInfo.username;
+  const isAuthOK = !!ctx_user.userInfo.userid;
   const withAuth = (component) => (isAuthOK && component) || <SignIn/>;
 
   return (
@@ -58,9 +59,10 @@ const RouteFactory = (props) => {
         <BrowserRouter>
         {/* Main Drawer */}
           <Routes>
-            <Route index       element={<SignIn/>             } />
-            <Route path="main" element={withAuth(<DashBoard/>)} />
-            <Route path="*"    element={<Navigate to="/"/>    } />
+            <Route index          element={<SignIn/>                 } />
+            <Route path="main"    element={withAuth(<DashBoard/>)    } />
+            <Route path="barcode" element={withAuth(<BarcodePrint/>) } />
+            <Route path="*"       element={<Navigate to="/"/>        } />
           </Routes>
         </BrowserRouter>
       </CTX_USER.Provider>

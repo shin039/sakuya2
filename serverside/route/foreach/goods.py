@@ -30,6 +30,20 @@ def goods():
     str_gname = str(dict_queryStr["goods_name"]);
     l_params.append(f"%{str_gname}%");
 
+  # Category
+  str_category = str(dict_queryStr.get("category"));
+  is_category  = str_category not in ['None', '', '0']; # 0 は、全てのカテゴリの条件指定の時
+  category     = f" AND mg.category = %s" if(is_category) else '';
+  if is_category:
+    l_params.append(f"{str_category}");
+
+  # Maker
+  str_maker = str(dict_queryStr.get("maker"));
+  is_maker  = str_maker not in ['None', '', '0']; # 0 は、全てのカテゴリの条件指定の時
+  maker     = f" AND mg.maker_id = %s" if(is_maker) else '';
+  if is_maker:
+    l_params.append(f"{str_maker}");
+
   # Limit
   is_limit = dict_queryStr.get('limit') not in [None, ''];
   limit    = f'limit %s' if(is_limit) else '';
@@ -54,7 +68,8 @@ def goods():
     ,mg.update_staff as update_staff
     ,mg.update_time  as update_time
 
-    ,cat.name as category_name
+    ,cat.name   as category_name
+    ,maker.name as maker_name
 
     ,mge.i01_name as i01_name
     ,mge.i02_name as i02_name
@@ -73,10 +88,13 @@ def goods():
     ,mge.t05_name as t05_name
     
   FROM m_goods mg
-    LEFT JOIN m_category          cat ON mg.category          = cat.category
-    LEFT JOIN m_goods_extra       mge ON mg.goods_id          = mge.goods_id
+    LEFT JOIN m_goods_extra       mge ON mg.goods_id  = mge.goods_id
+    LEFT JOIN m_category          cat ON mg.category  = cat.category
+    LEFT JOIN m_company         maker ON  mg.maker_id = maker.company_id and maker.is_supplier
   WHERE TRUE
     {gname}
+    {category}
+    {maker}
   ORDER BY goods_id
   {limit};
   '''

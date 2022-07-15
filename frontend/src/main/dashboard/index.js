@@ -21,14 +21,7 @@ const Dashboard = () => {
 
         {/* Chart */}
         <Grid item xs={12} md={8} lg={9}>
-          <Paper
-            sx={{
-              p: 2,
-              display: 'flex',
-              flexDirection: 'column',
-              height: 240,
-            }}
-          >
+          <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column', height: 240, }} >
             <Chart />
           </Paper>
         </Grid>

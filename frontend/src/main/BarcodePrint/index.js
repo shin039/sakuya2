@@ -49,9 +49,10 @@ const handleSubmit = (event, setGlist) => {
   const goods_name = data.get('goods_name');
   const category   = data.get('category');
   const maker      = data.get('maker');
+  const discount   = data.get('discount');
 
   const f_success = response => setGlist((response && response.data && response.data.result) || []);
-  apiGet({url: 'goods', o_params: {limit: 100, goods_name, category, maker}, f_success});
+  apiGet({url: 'goods', o_params: {limit: 1000, goods_name, category, maker, discount}, f_success});
 };
 
 // -----------------------------------------------------------------------------
@@ -61,8 +62,7 @@ const handleSubmit = (event, setGlist) => {
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // 検索条件表示部
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-const search_content = (categories, makers,setGlist) => {
-
+const search_content = (categories, makers, discounts, setGlist) => {
 
   const sel_category = (categories.length > 0)?(
     <FormControl sx={{minWidth: 150}}>
@@ -88,16 +88,29 @@ const search_content = (categories, makers,setGlist) => {
     </FormControl>
   ): '';
 
+  const sel_discount = (discounts.length > 0)?(
+    <FormControl sx={{minWidth: 170}}>
+      <InputLabel id="discount_label">Discount Price</InputLabel>
+      <Select id='discount' name='discount' defaultValue={''} label="Discount Price" labelId='discount_label'>
+        <MenuItem value={0} key={0}>Basic</MenuItem>
+        {discounts.map( discount => {
+          return <MenuItem value={discount.company_id} key={discount.company_id}>{discount.name}</MenuItem>}
+        )}
+      </Select>
+    </FormControl>
+  ): '';
+
   const tf_goodsname = <TextField id="goods_name" label="Goods Name" name="goods_name" variant="outlined" error={false} />;
 
   return (
     <>
       <Title>Search Condition</Title>
       <Box component="form" onSubmit={event => handleSubmit(event, setGlist)} noValidate sx={{ mt: 1 }}>
-        <Grid container direction='row' alignItems='center' spacing={0}>
+        <Grid container direction='row' alignItems='center' spacing={1}>
           <Grid item xs= {3}>{sel_category}</Grid>
           <Grid item xs= {3}>{sel_maker}</Grid>
-          <Grid item xs= {3}>{tf_goodsname}</Grid>
+          <Grid item xs= {6}>{tf_goodsname}</Grid>
+          <Grid item xs= {3}>{sel_discount}</Grid>
           <Grid item xs={12}><Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }} > Search </Button></Grid>
         </Grid>
       </Box>
@@ -262,6 +275,16 @@ const excel_export = (event, plist) => {
   // make Content
   const form_data = new FormData(event.currentTarget);
   let offset = 2; // 2行目からスタートするので。
+
+  // TODO どこかで共通化する。
+  const calcTaxed = (price, tax) => Math.ceil(price * (100 + Number(tax))/100);
+  const getYMD    = (dt) => {
+     const y = dt.getFullYear();
+     const m = ('00' + (dt.getMonth()+1)).slice(-2);
+     const d = ('00' + dt.getDate()).slice(-2);
+     return (y  + m  + d);
+  }
+
   for(const record of plist){
     const num_of_print = Number(form_data.get(`num_${record.goods_id}`));
 
@@ -273,13 +296,13 @@ const excel_export = (event, plist) => {
         record.name,
         record.t01_name,
         record.t02_name,
-        '', /* TODO いちやまプライス*/
+        '', /* TODO いちやまプライスは使わなくなる予定。 */
         record.rt_price,
         '+税',
         record.jan,
         '',
-        '', /* TODO いちやまプライス*/
-        (record.rt_price * (100 + Number(record.tax_rate))/100), // TODO 税込計算をUtilityに。
+        '', /* TODO いちやまプライスは使わなくなる予定。 */
+        calcTaxed(record.rt_price, record.tax_rate),
         ''
       ];
 
@@ -293,7 +316,8 @@ const excel_export = (event, plist) => {
     }
   }
 
-  downloadExcel(workbook, 'asdf');
+  downloadExcel(workbook, `バーコード印刷ファイル_${getYMD(new Date())}`);
+
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -307,15 +331,18 @@ const BarcodePrint = () => {
   const [st_printList, setPrintList  ] = useState([]);
   const [m_categories, setCategories ] = useState([]);
   const [m_makers    , setMakers     ] = useState([]);
+  const [m_discounts    , setDiscounts     ] = useState([]); // 卸先
 
   // マウント時に実行
   useEffect(() => {
     // 検索条件のセレクトボックスに使うデータを取得する
-    const f_success_cat   = response => setCategories((response && response.data && response.data.result) || []);
-    const f_success_maker = response => setMakers    ((response && response.data && response.data.result) || []);
+    const f_success_cat      = response => setCategories((response && response.data && response.data.result) || []);
+    const f_success_maker    = response => setMakers    ((response && response.data && response.data.result) || []);
+    const f_success_discount = response => setDiscounts ((response && response.data && response.data.result) || []);
 
-    apiGet({url: 'category',  f_success: f_success_cat});
-    apiGet({url: 'company' ,  f_success:f_success_maker, o_params: {is_supplier: true} });
+    apiGet({url: 'category'        , f_success: f_success_cat});
+    apiGet({url: 'company'         , f_success: f_success_maker, o_params: {is_supplier: true} });
+    apiGet({url: 'discount/company', f_success: f_success_discount});
   }, []);
 
   return (
@@ -323,7 +350,7 @@ const BarcodePrint = () => {
       <Grid container spacing={3}>
         <Grid item xs={12}>
           <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column'}} >
-            {search_content(m_categories, m_makers, setGoodsList)}
+            {search_content(m_categories, m_makers, m_discounts, setGoodsList)}
           </Paper>
         </Grid>
         <Grid item xs={12}>

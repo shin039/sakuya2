@@ -213,28 +213,28 @@ CREATE TABLE IF NOT EXISTS m_material_type (
 -- ----------------------------------------------------------------------------
 -- Corporate Company or Indivisual Company
 CREATE TABLE IF NOT EXISTS m_company (
-  company_id        serial,
-  name              text    NOT NULL,
-  regal_personality varchar(10),
-  tel               varchar(15),
-  fax               varchar(15),
-  address           text,
+  company_id           serial,
+  name                 text    NOT NULL,
+  regal_personality    varchar(10),
+  regal_position_front boolean DEFAULT false,
+  tel                  varchar(15), fax                  varchar(15),
+  address              text,
 
-  is_supplier       boolean NOT NULL, -- is Supplier
-  is_customer       boolean NOT NULL, -- is Customer
-  is_wholesale      boolean NOT NULL, -- Wholesale available
+  is_supplier          boolean NOT NULL, -- is Supplier
+  is_customer          boolean NOT NULL, -- is Customer
+  is_wholesale         boolean NOT NULL, -- Wholesale available
 
-  payment_way       text,             -- Payment way
-  closing_date      varchar(10),      -- Payment term, closing
-  payment_date      varchar(10),      -- Payment term, payment
+  payment_way          text,             -- Payment way
+  closing_date         varchar(10),      -- Payment term, closing
+  payment_date         varchar(10),      -- Payment term, payment
 
-  discription       text,
+  discription          text,
 
-  is_delete         boolean DEFAULT false,
-  regist_staff      integer,
-  regist_time       timestamp,
-  update_staff      integer,
-  update_time       timestamp,
+  is_delete            boolean DEFAULT false,
+  regist_staff         integer,
+  regist_time          timestamp,
+  update_staff         integer,
+  update_time          timestamp,
 
   PRIMARY KEY (company_id)
 );
@@ -269,7 +269,11 @@ CREATE TABLE IF NOT EXISTS m_discount (
 
   -- use either column
   ratio             numeric, -- Ratio of wholesale price to retail price.
-  price             numeric, -- tax exclude. -> refer to the tax on m_goods table
+  ws_price          numeric, -- tax exclude. -> refer to the tax on m_goods table
+  rt_price          numeric, -- tax exclude. -> refer to the tax on m_goods table
+
+  -- for duplicate jan code.
+  jan               varchar(13),
 
   discription       text,
 

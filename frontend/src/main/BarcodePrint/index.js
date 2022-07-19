@@ -316,7 +316,7 @@ const excel_export = (event, plist) => {
     }
   }
 
-  downloadExcel(workbook, `バーコード印刷ファイル_${getYMD(new Date())}`);
+  downloadExcel(workbook, `${getYMD(new Date())}_バーコード印刷ファイル`);
 
 }
 

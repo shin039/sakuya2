@@ -53,13 +53,15 @@ CORS(app, supports_credentials=True, origins=ORIGINS)
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 # JWT Settings
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-# TODO
-# app.config.from_object('config') => config.pyなどに設定を入れておいて読み込む?
-app.config["JWT_SECRET_KEY"]           = "TODO It's Secret Key. Set to ENV."
+JWT_SECRET_KEY    = getenv('APP_JWT_SECRET_KEY')
+JWT_COOKIE_DOMAIN = getenv('APP_JWT_COOKIE_DOMAIN')
+
+app.config["JWT_SECRET_KEY"]           = JWT_SECRET_KEY
 app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(minutes=10)
 app.config["JWT_TOKEN_LOCATION"]       = ['cookies']
 app.config["JWT_COOKIE_SAMESITE"]      = "Strict";
-#app.config["JWT_COOKIE_SECURE"]        = True; # or False. 要検討。
+app.config["JWT_COOKIE_SECURE"]        = False; # or False. 要検討。HTTPSの時のみCookie送信。
+#app.config["JWT_COOKIE_DOMAIN"]        = JWT_COOKIE_DOMAIN
 
 jwt = JWTManager(app);
 
@@ -140,6 +142,6 @@ if __name__ == "__main__":
     app.env   = ENV
 
   # To Set .env, host and port
-  # TODO
-  #app.run(host='0.0.0.0', port=5000)
-  app.run(host='127.0.0.1', port=5000)
+  HOST = getenv('APP_SV_HOST')
+  PORT = getenv('APP_SV_PORT')
+  app.run(host=HOST, port=PORT)

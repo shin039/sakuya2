@@ -26,19 +26,19 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { DataGrid } from '@mui/x-data-grid';
 
 // Proprietary 
-import {apiGet}     from 'api'
+import util         from 'common/util';
+import {apiGet}     from 'api';
 import DisplayFrame from 'component/DisplayFrame/MultiPanel';
 import Title        from 'component/Title';
 
 // Excel Export
-import EXCEL from 'exceljs';
+import EXCEL           from 'exceljs';
 import {downloadExcel} from 'common/excel';
 
 // -----------------------------------------------------------------------------
 //  Const
 // -----------------------------------------------------------------------------
 const _LIST_ROW_SIZE = 10;
-const _FORMATTER = new Intl.NumberFormat('ja-JP', { style: 'currency', currency: 'JPY' });
 
 // -----------------------------------------------------------------------------
 // Function
@@ -67,7 +67,7 @@ const search_content = (categories, makers, discounts, setGlist) => {
   const sel_category = (categories.length > 0)?(
     <FormControl sx={{minWidth: 150}}>
       <InputLabel id="category_label">Category</InputLabel>
-      <Select id='category' name='category' defaultValue={''} label="Category" labelId='category_label'>
+      <Select id='category' name='category' defaultValue={0} label="Category" labelId='category_label'>
         <MenuItem value={0} key={0}>ALL</MenuItem>
         {categories.map(category => {
           return <MenuItem value={category.category} key={category.category}>{category.name}</MenuItem>}
@@ -79,7 +79,7 @@ const search_content = (categories, makers, discounts, setGlist) => {
   const sel_maker = (makers.length > 0)?(
     <FormControl sx={{minWidth: 150}}>
       <InputLabel id="maker_label">Maker</InputLabel>
-      <Select id='maker' name='maker' defaultValue={''} label="Maker" labelId='maker_label'>
+      <Select id='maker' name='maker' defaultValue={0} label="Maker" labelId='maker_label'>
         <MenuItem value={0} key={0}>ALL</MenuItem>
         {makers.map( maker => {
           return <MenuItem value={maker.company_id} key={maker.company_id}>{maker.name}</MenuItem>}
@@ -91,7 +91,7 @@ const search_content = (categories, makers, discounts, setGlist) => {
   const sel_discount = (discounts.length > 0)?(
     <FormControl sx={{minWidth: 170}}>
       <InputLabel id="discount_label">Discount Price</InputLabel>
-      <Select id='discount' name='discount' defaultValue={''} label="Discount Price" labelId='discount_label'>
+      <Select id='discount' name='discount' defaultValue={0} label="Discount Price" labelId='discount_label'>
         <MenuItem value={0} key={0}>Basic</MenuItem>
         {discounts.map( discount => {
           return <MenuItem value={discount.company_id} key={discount.company_id}>{discount.name}</MenuItem>}
@@ -141,12 +141,12 @@ const list_content = (glist, plist, setPlist) => {
     { field: 't01_name'  , headerName: 'Color', width: 100 },
     { field: 't02_name'  , headerName: 'Size' , width: 100 },
     {
-      field: 'price_taxin)',
+      field: 'price_taxin',
       headerName: 'Price (tax in)',
       description: 'Tax Included Retail Price',
       sortable: false,
       width: 100,
-      valueGetter: (params) => _FORMATTER.format(params.row.rt_price * (100 + Number(params.row.tax_rate))/100) ,
+      valueGetter: (params) => util.formatYen(util.calcTaxed(params.row.rt_price ,params.row.tax_rate)) ,
     },
     { field: 'jan'       , headerName: 'JAN'  , width: 130 },
     { field: 'maker_name', headerName: 'Maker', width: 150 },
@@ -183,6 +183,7 @@ const print_content = (glist, plist, setPlist) => {
       name,
       jan,
       rt_price,
+      tax_rate,
       t01_name,
       t02_name,
     } = record;
@@ -201,7 +202,7 @@ const print_content = (glist, plist, setPlist) => {
         <Grid item xs={2}> {t01_name}</Grid>
         <Grid item xs={2}> {t02_name}</Grid>
         <Grid item xs={2}> {jan}</Grid>
-        <Grid item xs={1}> {rt_price}</Grid>
+        <Grid item xs={1}> {util.formatYen(util.calcTaxed(rt_price, tax_rate))}</Grid>
         <Grid item xs={2}><TextField name={`num_${goods_id}`} type='number' defaultValue={1} inputProps={{min: 0, max: 100}} size='small'/></Grid>
         <Grid item xs={1}><IconButton size='small' onClick={deleteAction}><DeleteIcon /></IconButton></Grid>
       </Grid>
@@ -253,14 +254,9 @@ const excel_export = (event, plist) => {
     '商品名',
     '色・柄',
     'サイズ',
-    'いちやま価格',
-    '価格表記',
-    '税表記',
+    '税抜価格表記',
     'JAN',
-    '備考',
-    'いちやま総額',
     '総額表記',
-    '廃盤'
   ]
 
   // make Header
@@ -276,8 +272,6 @@ const excel_export = (event, plist) => {
   const form_data = new FormData(event.currentTarget);
   let offset = 2; // 2行目からスタートするので。
 
-  // TODO どこかで共通化する。
-  const calcTaxed = (price, tax) => Math.ceil(price * (100 + Number(tax))/100);
   const getYMD    = (dt) => {
      const y = dt.getFullYear();
      const m = ('00' + (dt.getMonth()+1)).slice(-2);
@@ -296,20 +290,28 @@ const excel_export = (event, plist) => {
         record.name,
         record.t01_name,
         record.t02_name,
-        '', /* TODO いちやまプライスは使わなくなる予定。 */
         record.rt_price,
-        '+税',
         record.jan,
-        '',
-        '', /* TODO いちやまプライスは使わなくなる予定。 */
-        calcTaxed(record.rt_price, record.tax_rate),
-        ''
+        util.calcTaxed(record.rt_price, record.tax_rate),
       ];
+
+      const cell_format_yen = '"\\"#,##0;[Red]"\\"-#,##0';
+
+      const format = [ '', '', '', '', cell_format_yen, '', cell_format_yen ];
+
+      const getval =  (val, colIdx) => {
+        if (false) return util.dateToStr(val);             // 日付
+        if ([4, 6].includes(colIdx)) return parseInt(val); // 金額
+        if (false) return Number(val);                     // 数値
+        return val;                                        // 文字列
+      };
 
       // Column
       for(const index in content_value){
-        const content = worksheet.getCell(offset, (Number(index) + 1));
-        content.value = content_value[index];
+        const content  = worksheet.getCell(offset, (Number(index) + 1));
+        const value    = content_value[index];
+        content.numFmt = format[index];
+        content.value  = getval(value, Number(index));
       }
       // Set Next Row
       offset++;

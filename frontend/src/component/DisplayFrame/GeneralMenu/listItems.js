@@ -39,7 +39,7 @@ export const mainListItems = (
 
 export const secondaryListItems = (
   <React.Fragment>
-    <ListSubheader component="div" inset> Saved reports </ListSubheader>
+    <ListSubheader component="div" inset> Master mainte </ListSubheader>
 
     {MENU_SECONDARY_LIST.map((menu_item) => makeMenuItem(menu_item))}
   </React.Fragment>

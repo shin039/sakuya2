@@ -9,11 +9,11 @@ import Typography                            from '@mui/material/Typography';
 import Toolbar                               from '@mui/material/Toolbar';
 import IconButton                            from '@mui/material/IconButton';
 import ChevronLeftIcon                       from '@mui/icons-material/ChevronLeft';
-import NotificationsIcon                     from '@mui/icons-material/Notifications';
+//import NotificationsIcon                     from '@mui/icons-material/Notifications';
 import Divider                               from '@mui/material/Divider';
 import List                                  from '@mui/material/List';
 import MenuIcon                              from '@mui/icons-material/Menu';
-import Badge                                 from '@mui/material/Badge';
+//import Badge                                 from '@mui/material/Badge';
 import { mainListItems, secondaryListItems } from 'component/DisplayFrame/GeneralMenu/listItems';
 
 // -----------------------------------------------------------------------------

@@ -1,11 +1,14 @@
-import {useCookies} from 'react-cookie';
+//import {useCookies} from 'react-cookie';
 import axios        from 'axios';
 import log          from 'common/log';
 
 // -----------------------------------------------------------------------------
 // Common Settings
 // -----------------------------------------------------------------------------
-const _API_HOST = process.env.REACT_APP_API_URL
+
+const _NODE_ENV = process.env.NODE_ENV;
+const _API_HOST = (_NODE_ENV === 'production')? process.env.REACT_APP_PRD_API_URL: process.env.REACT_APP_API_URL;
+
 const _DF_F_SUC = response => {log.debug(response)}
 const _DF_F_ERR = response => {
   const response_err = (response.response && response.response.data && response.response.data.message) || null;
@@ -13,16 +16,16 @@ const _DF_F_ERR = response => {
   log.error(err_msg)
 }
 
-const _COMMON_F_ERR = (response, default_func) => {
-  // ログイン NGの場合に処理を行う。
-  const result = (response.response && response.response.data && response.response.data.rsult) || null;
-  if(result === 'Login_NG'){
-    // TODO remove Cookie... and redirect Login page. 
-  }
-
-  // 既存のエラー処理を実行する。
-  default_func(response);
-}
+//const _COMMON_F_ERR = (response, default_func) => {
+//  // ログイン NGの場合に処理を行う。
+//  const result = (response.response && response.response.data && response.response.data.rsult) || null;
+//  if(result === 'Login_NG'){
+//    // TODO remove Cookie... and redirect Login page. 
+//  }
+//
+//  // 既存のエラー処理を実行する。
+//  default_func(response);
+//}
 
 // -----------------------------------------------------------------------------
 // API: Get Request

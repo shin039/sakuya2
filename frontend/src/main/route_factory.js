@@ -10,9 +10,11 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
 import { CookiesProvider, useCookies  } from "react-cookie";
 
 // Business Components
-import SignIn       from 'main/SignIn';
-import DashBoard    from 'main/Dashboard';
-import BarcodePrint from 'main/BarcodePrint';
+import SignIn       from 'main/C_SignIn';
+import DashBoard    from 'main/C_Dashboard';
+import BarcodePrint from 'main/F_BarcodePrint';
+
+import Goods        from 'main/CM_Goods';
 
 // -----------------------------------------------------------------------------
 // Context Data
@@ -59,9 +61,12 @@ const RouteFactory = (props) => {
         <BrowserRouter>
         {/* Main Drawer */}
           <Routes>
+            {/* Main */}
             <Route index          element={<SignIn/>                 } />
             <Route path="main"    element={withAuth(<DashBoard/>)    } />
             <Route path="barcode" element={withAuth(<BarcodePrint/>) } />
+            {/* Master */}
+            <Route path="goods"   element={withAuth(<Goods/>) } />
             <Route path="*"       element={<Navigate to="/"/>        } />
           </Routes>
         </BrowserRouter>

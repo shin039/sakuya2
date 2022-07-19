@@ -18,7 +18,7 @@ bp = Blueprint('goods', __name__, url_prefix='/goods')
 # ------------------------------------------------------------------------------
 @bp.route("/", methods=['GET'])
 @jwt_required()
-def goods():
+def goods(a_goodsId=None):
   # Analyze URL Parameter
   dict_queryStr = request.args;
   l_params      = [];
@@ -37,6 +37,13 @@ def goods():
   # - - - - - - - - - - 
   # Where
   # - - - - - - - - - - 
+  # Goods Id (詳細検索の時)
+  is_gid    = a_goodsId not in [None, ''];
+  where_gid = f" AND mg.goods_id = %s" if(is_gid) else '';
+  if is_gid:
+    str_gid = str(a_goodsId);
+    l_params.append(f"{str_gid}");
+
   # 商品名
   is_gname    = dict_queryStr.get('goods_name') not in [None, ''];
   where_gname = f" AND mg.name like %s" if(is_gname) else '';
@@ -91,17 +98,24 @@ def goods():
     ,cat.name   as category_name
     ,maker.name as maker_name
 
-    -- Extention
+    -- Extra
     ,mge.i01_name as i01_name ,mge.i02_name as i02_name ,mge.i03_name as i03_name ,mge.i04_name as i04_name ,mge.i05_name as i05_name
     ,mge.n01_name as n01_name ,mge.n02_name as n02_name ,mge.n03_name as n03_name ,mge.n04_name as n04_name ,mge.n05_name as n05_name
     ,mge.t01_name as t01_name ,mge.t02_name as t02_name ,mge.t03_name as t03_name ,mge.t04_name as t04_name ,mge.t05_name as t05_name
 
+    -- Extra Type
+    ,mget.i01_name as t_i01_name ,mget.i02_name as t_i02_name ,mget.i03_name as t_i03_name ,mget.i04_name as t_i04_name ,mget.i05_name as t_i05_name
+    ,mget.n01_name as t_n01_name ,mget.n02_name as t_n02_name ,mget.n03_name as t_n03_name ,mget.n04_name as t_n04_name ,mget.n05_name as t_n05_name
+    ,mget.t01_name as t_t01_name ,mget.t02_name as t_t02_name ,mget.t03_name as t_t03_name ,mget.t04_name as t_t04_name ,mget.t05_name as t_t05_name
+
   FROM m_goods mg
-    LEFT JOIN m_goods_extra   mge ON mg.goods_id = mge.goods_id
-    LEFT JOIN m_category      cat ON mg.category = cat.category
-    LEFT JOIN m_company     maker ON mg.maker_id = maker.company_id and maker.is_supplier
+    LEFT JOIN m_goods_extra       mge ON mg.goods_id          = mge.goods_id
+    LEFT JOIN m_goods_extra_type mget ON mge.goods_extra_type = mget.goods_extra_type
+    LEFT JOIN m_category          cat ON mg.category          = cat.category
+    LEFT JOIN m_company         maker ON mg.maker_id          = maker.company_id and maker.is_supplier
     {join_discount}
   WHERE TRUE
+    {where_gid}
     {where_gname}
     {where_category}
     {where_maker}
@@ -118,17 +132,24 @@ def goods():
 # ------------------------------------------------------------------------------
 # Detail Data: Select
 # ------------------------------------------------------------------------------
-@bp.route("/<goods_id>", methods=['GET', 'POST', 'PUT', 'DELETE']) # PUT => IDを伴うINSERT, POST => IDを伴わないINSERT
+@bp.route("/<goods_id>", methods=['GET', 'POST', 'DELETE']) # PUT => IDを伴うINSERT, POST => IDを伴わないINSERT
 @jwt_required()
 def goods_detail(goods_id):
+  req_method = request.method
+
   # NOTE: request オブジェクトの仕様確認
-  print(f'METHOD => {request.method}')
-  print(f'DATA   => {request.get_data()}')
+  #print(f'DATA   => {request.get_data()}')
   
   # NOTE: application/jsonでjsonデータ等をもらう時。
   #data = request.get_json()
   #text = data['post_text']
 
+  if req_method == 'GET':
+    return goods(goods_id)
+
+
+  # DEBUG それ以外の時
+  print('# Not GET Goods Detail.')
   result   = DBManager.select('SELECT * FROM m_goods WHERE goods_id = %s;', (str(goods_id),) ) # , はtupleとして認識させるため
   response = {'result': result}
 

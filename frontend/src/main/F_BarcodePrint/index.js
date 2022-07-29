@@ -4,25 +4,25 @@
 // React
 import { useEffect, useState } from 'react';
 // Material UI
-import Box       from '@mui/material/Box';
-import Button    from '@mui/material/Button';
-import TextField from '@mui/material/TextField';
+import {
+  Box,
+  Button,
+  TextField,
+  Select,
+  MenuItem,
+  InputLabel,
+  FormControl,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemText,
+  Grid,
+  Paper,
+  IconButton,
+  Divider
+} from '@mui/material';
 
-import Select      from '@mui/material/Select';
-import MenuItem    from '@mui/material/MenuItem';
-import InputLabel  from '@mui/material/InputLabel';
-import FormControl from '@mui/material/FormControl';
-
-import List           from '@mui/material/List';
-import ListItem       from '@mui/material/ListItem';
-import ListItemButton from '@mui/material/ListItemButton';
-import ListItemText   from '@mui/material/ListItemText';
-
-import Grid       from '@mui/material/Grid';
-import Paper      from '@mui/material/Paper';
-import IconButton from '@mui/material/IconButton';
-import DeleteIcon from '@mui/icons-material/Delete';
-
+import DeleteIcon   from '@mui/icons-material/Delete';
 import { DataGrid } from '@mui/x-data-grid';
 
 // Proprietary 
@@ -106,11 +106,12 @@ const search_content = (categories, makers, discounts, setGlist) => {
     <>
       <Title>Search Condition</Title>
       <Box component="form" onSubmit={event => handleSubmit(event, setGlist)} noValidate sx={{ mt: 1 }}>
-        <Grid container direction='row' alignItems='center' spacing={1}>
+        <Grid container direction='row' alignItems='center' spacing={2}>
+          <Grid item xs= {12}>{sel_discount}</Grid>
+          <Grid item xs= {12}><Divider/></Grid>
           <Grid item xs= {3}>{sel_category}</Grid>
           <Grid item xs= {3}>{sel_maker}</Grid>
           <Grid item xs= {6}>{tf_goodsname}</Grid>
-          <Grid item xs= {3}>{sel_discount}</Grid>
           <Grid item xs={12}><Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }} > Search </Button></Grid>
         </Grid>
       </Box>
@@ -123,11 +124,11 @@ const search_content = (categories, makers, discounts, setGlist) => {
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 const list_content = (glist, plist, setPlist) => {
 
-  const selectActioin = (goods_id, glist, slist, setPlist) => {
-    const goods_info = glist.find((record) => record.goods_id === goods_id);
+  const selectActioin = (sku_id, glist, slist, setPlist) => {
+    const goods_info = glist.find((record) => record.sku_id === sku_id);
 
     // 同じものが登録されないようにチェック
-    const is_duplicated = typeof (plist.find((record) => record.goods_id === goods_id)) !== 'undefined' ;
+    const is_duplicated = typeof (plist.find((record) => record.sku_id === sku_id)) !== 'undefined' ;
     if(is_duplicated) return;
 
     // 重複を除去してマージする。
@@ -161,7 +162,7 @@ const list_content = (glist, plist, setPlist) => {
           autoHeight
           rows={glist}
           columns={dg_columns}
-          getRowId={(row) => row.goods_id}
+          getRowId={(row) => row.sku_id}
           pageSize={_LIST_ROW_SIZE}
           rowsPerPageOptions={[_LIST_ROW_SIZE]}
           onRowClick={(params) => selectActioin(params.id, glist, plist, setPlist) }
@@ -179,7 +180,7 @@ const print_content = (glist, plist, setPlist) => {
   const createRecord = record => {
 
     const {
-      goods_id,
+      sku_id,
       name,
       jan,
       rt_price,
@@ -190,7 +191,7 @@ const print_content = (glist, plist, setPlist) => {
 
     const deleteAction = () => {
       const tmpList = [...plist];
-      const index   = tmpList.findIndex((record) => record.goods_id === goods_id)
+      const index   = tmpList.findIndex((record) => record.sku_id === sku_id)
       tmpList.splice(index, 1)
       setPlist(tmpList);
     }
@@ -203,14 +204,14 @@ const print_content = (glist, plist, setPlist) => {
         <Grid item xs={2}> {t02_name}</Grid>
         <Grid item xs={2}> {jan}</Grid>
         <Grid item xs={1}> {util.formatYen(util.calcTaxed(rt_price, tax_rate))}</Grid>
-        <Grid item xs={2}><TextField name={`num_${goods_id}`} type='number' defaultValue={1} inputProps={{min: 0, max: 100}} size='small'/></Grid>
+        <Grid item xs={2}><TextField name={`num_${sku_id}`} type='number' defaultValue={1} inputProps={{min: 0, max: 100}} size='small'/></Grid>
         <Grid item xs={1}><IconButton size='small' onClick={deleteAction}><DeleteIcon /></IconButton></Grid>
       </Grid>
       );
     }
 
     return (
-       <ListItem key={goods_id} disablePadding>
+       <ListItem key={sku_id} disablePadding>
           <ListItemButton>
             <ListItemText primary={makeDetail(name)} />
           </ListItemButton>
@@ -280,7 +281,7 @@ const excel_export = (event, plist) => {
   }
 
   for(const record of plist){
-    const num_of_print = Number(form_data.get(`num_${record.goods_id}`));
+    const num_of_print = Number(form_data.get(`num_${record.sku_id}`));
 
     // ROW
     for(let i=0; i<num_of_print; i++){

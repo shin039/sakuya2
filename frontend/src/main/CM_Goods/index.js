@@ -21,7 +21,6 @@ import { DataGrid } from '@mui/x-data-grid';
 
 // Proprietary 
 import DETAIL       from 'main/CM_Goods/detail';
-import util         from 'common/util';
 import {apiGet}     from 'api'
 import DisplayFrame from 'component/DisplayFrame/MultiPanel';
 import Title        from 'component/Title';
@@ -35,9 +34,10 @@ const handleSubmit = (event, setGlist) => {
   const goods_name = data.get('goods_name');
   const category   = data.get('category');
   const maker      = data.get('maker');
+  const not_sku    = true;
 
   const f_success = response => setGlist((response && response.data && response.data.result) || []);
-  apiGet({url: 'goods', o_params: {limit: 1000, goods_name, category, maker}, f_success});
+  apiGet({url: 'goods', o_params: {limit: 1000, goods_name, category, maker, not_sku}, f_success});
 };
 
 // -----------------------------------------------------------------------------
@@ -95,7 +95,11 @@ const search_content = (categories, makers, setGlist) => {
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 const list_content = (stateSet) => {
 
-  const {st_goodsList, i_rowNum, setRowNum, open, setOpen, d_goodsId, setDGoodsId} = stateSet;
+  const {st_goodsList, o_rowNum, setRowNum, open, setOpen, d_goodsId, setDGoodsId} = stateSet;
+  
+  
+  const i_rowNum      = o_rowNum.num;
+  const is_error      = o_rowNum.error;
 
   const _DISP_MIN     = 1;
   const _DISP_MAX     = 100;
@@ -108,27 +112,21 @@ const list_content = (stateSet) => {
     setOpen(true);
   }
 
+
+  const is_rowNumOK = (rowNum)    => (_DISP_MIN <= rowNum && rowNum <= _DISP_MAX);
+
   const onChange = (event) => {
     const input = Number(event.target.value);
-    if(_DISP_MIN <= input && input <= _DISP_MAX) setRowNum(input);
-    else                                         setRowNum(i_rowNum);
+    if(is_rowNumOK(input)) setRowNum({num: input   , error: false});
+    else                     setRowNum({num: i_rowNum, error: true});
   }
 
+  const status_rowNum = (! is_error)?{error: false, helperText: ''}: {error: true, helperText: `Input, ${_DISP_MIN} ～ ${_DISP_MAX}.`};
 
   const dg_columns = [
-    { field: 'name'      , headerName: 'Name' , width: 230 },
-    { field: 't01_name'  , headerName: 'Color', width: 100 },
-    { field: 't02_name'  , headerName: 'Size' , width: 100 },
-    {
-      field: 'price_taxin',
-      headerName: 'Price (tax in)',
-      description: 'Tax Included Retail Price',
-      sortable: false,
-      width: 100,
-      valueGetter: (params) => util.formatYen(util.calcTaxed(params.row.rt_price ,params.row.tax_rate)) ,
-    },
-    { field: 'jan'       , headerName: 'JAN'  , width: 130 },
-    { field: 'maker_name', headerName: 'Maker', width: 150 },
+    { field: 'category_name', headerName: 'Category', width: 200 },
+    { field: 'name'         , headerName: 'Name'    , width: 300 },
+    { field: 'maker_name'   , headerName: 'Maker'   , width: 150 },
   ];
 
   return (
@@ -138,7 +136,9 @@ const list_content = (stateSet) => {
       <DETAIL fromParent={{open, setOpen, d_goodsId}} />
 
       <Grid container direction='row' justifyContent='flex-start' alignItems='center' spacing={1} style={{marginBottom: '1em'}}>
-        <Grid item xs= {2}><TextField onChange={onChange} type='number' label='RowNum' defaultValue={i_rowNum} inputProps={{min: _DISP_MIN, max: _DISP_MAX}} size='small'/></Grid>
+        <Grid item xs= {2}>
+          <TextField {...status_rowNum} onChange={onChange} type='number' label='RowNum' defaultValue={i_rowNum} inputProps={{min: _DISP_MIN, max: _DISP_MAX}} size='small'/>
+        </Grid>
       </Grid>
       
       <div style={{height: _LIST_HEIGHT}}>
@@ -164,13 +164,13 @@ const list_content = (stateSet) => {
 const GoodsList = () => {
 
   // State 定義
-  const [st_goodsList, setGoodsList  ] = useState([]);
-  const [m_categories, setCategories ] = useState([]);
-  const [m_makers    , setMakers     ] = useState([]);
-  const [i_rowNum    , setRowNum     ] = useState(20);
+  const [st_goodsList, setGoodsList ] = useState([]);
+  const [m_categories, setCategories] = useState([]);
+  const [m_makers    , setMakers    ] = useState([]);
+  const [o_rowNum    , setRowNum    ] = useState({num:20, error: false});
 
-  const [open        , setOpen       ] = useState(false);
-  const [d_goodsId   , setDGoodsId   ] = useState(null);
+  const [open        , setOpen      ] = useState(false);
+  const [d_goodsId   , setDGoodsId  ] = useState(null);
 
   // マウント時に実行
   useEffect(() => {
@@ -182,7 +182,7 @@ const GoodsList = () => {
     apiGet({url: 'company'         , f_success: f_success_maker, o_params: {is_supplier: true} });
   }, []);
 
-  const stateSet = {st_goodsList, i_rowNum, setRowNum, open, setOpen, d_goodsId, setDGoodsId};
+  const stateSet = {st_goodsList, o_rowNum, setRowNum, open, setOpen, d_goodsId, setDGoodsId};
 
   return (
     <DisplayFrame title='Barcode Print'>

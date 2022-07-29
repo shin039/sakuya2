@@ -30,16 +30,10 @@ CREATE TABLE IF NOT EXISTS m_staff (
 -- Goods
 CREATE TABLE IF NOT EXISTS m_goods (
   goods_id          serial,
-  model_no          text,
-  jan               varchar(13),
   category          integer,
 
   name              text NOT NULL,
   maker_id          integer, -- Company Id
-  unit_cost         numeric,
-  tax_rate          numeric, -- For Reduced Tax Rate
-  ws_price          numeric, -- WholeSale Price (Tax Exclude)
-  rt_price          numeric, -- Retail    Price (Tax Exclude)
 
   is_delete         boolean DEFAULT false,
   regist_staff      integer,
@@ -47,8 +41,7 @@ CREATE TABLE IF NOT EXISTS m_goods (
   update_staff      integer,
   update_time       timestamp,
 
-  PRIMARY KEY (goods_id),
-  UNIQUE  (model_no)
+  PRIMARY KEY (goods_id)
 );
 
 -- Goods Details ( Goods : Goods Details => 1 : 1)
@@ -75,9 +68,17 @@ CREATE TABLE IF NOT EXISTS m_goods_details (
 );
 
 -- Goods Extra ( Goods : Goods Extra => 1 : N)
-CREATE TABLE IF NOT EXISTS m_goods_extra (
+CREATE TABLE IF NOT EXISTS m_goods_sku (
+  sku_id            serial,
   goods_id          integer NOT NULL,
-  goods_extra_type  integer NOT NULL,
+  goods_sku_type    integer NOT NULL,
+
+  model_no          varchar(30),
+  jan               varchar(13),
+  unit_cost         numeric,
+  tax_rate          numeric, -- For Reduced Tax Rate
+  ws_price          numeric, -- WholeSale Price (Tax Exclude)
+  rt_price          numeric, -- Retail    Price (Tax Exclude)
 
   i01_name         integer,
   i02_name         integer,
@@ -100,7 +101,8 @@ CREATE TABLE IF NOT EXISTS m_goods_extra (
   update_staff      integer,
   update_time       timestamp,
 
-  PRIMARY KEY (goods_id, goods_extra_type)
+  PRIMARY KEY (sku_id),
+  UNIQUE  (model_no)
 );
 
 -- ----------------------------------------------------------------------------
@@ -122,9 +124,8 @@ CREATE TABLE IF NOT EXISTS m_category (
 );
 
 -- Goods Extra ( Goods Type : Goods Extra Type => 1 : N)
-CREATE TABLE IF NOT EXISTS m_goods_extra_type (
-  goods_extra_type serial,
-  category         integer NOT NULL,
+CREATE TABLE IF NOT EXISTS m_goods_sku_type (
+  goods_sku_type serial,
 
   i01_name         text,
   i02_name         text,
@@ -149,10 +150,10 @@ CREATE TABLE IF NOT EXISTS m_goods_extra_type (
   update_staff      integer,
   update_time       timestamp,
 
-  PRIMARY KEY (goods_extra_type)
+  PRIMARY KEY (goods_sku_type)
 );
 
-CREATE INDEX ON m_goods_extra (goods_extra_type);
+CREATE INDEX ON m_goods_sku (goods_sku_type);
 
 -- ----------------------------------------------------------------------------
 -- CREATE Goods Material TABLE
@@ -160,16 +161,20 @@ CREATE INDEX ON m_goods_extra (goods_extra_type);
 -- Goods Material ( Goods : Goods Material => N : N)
 --  => To Link Goods and Material
 CREATE TABLE IF NOT EXISTS m_goods_material (
-  goods_id          integer,
-  material_id       integer, 
- 
+  goods_material_id serial ,
+
+  goods_id          integer NOT NULL,
+  sku_id            integer DEFAULT NULL, -- SKU単位の素材設定の時に使う
+  material_id       integer NOT NULL, 
+  discription       text,
   is_delete         boolean DEFAULT false,
+
   regist_staff      integer,
   regist_time       timestamp,
   update_staff      integer,
   update_time       timestamp,
 
-  PRIMARY KEY (goods_id, material_id)
+  PRIMARY KEY (goods_material_id)
 );
 
 -- ----------------------------------------------------------------------------
@@ -183,6 +188,10 @@ CREATE TABLE IF NOT EXISTS m_material (
 
   unit_price        numeric,
   tax               numeric, -- For Reduced Tax Rate
+
+  lot               text,
+  discription       text,
+  kind              integer, -- Wages: 1, Royalty: 11, Material: 100~
 
   is_delete         boolean DEFAULT false,
   regist_staff      integer,
@@ -264,7 +273,7 @@ CREATE TABLE IF NOT EXISTS m_company_staff (
 -- Companies with special discount
 CREATE TABLE IF NOT EXISTS m_discount (
   discount_id       serial,
-  goods_id          integer,
+  sku_id            integer, -- m_goods_sku sku_id
   company_id        integer,
 
   -- use either column
@@ -284,5 +293,5 @@ CREATE TABLE IF NOT EXISTS m_discount (
   update_time       timestamp,
 
   PRIMARY KEY (discount_id),
-  UNIQUE (goods_id, company_id)
+  UNIQUE (sku_id, company_id)
 );

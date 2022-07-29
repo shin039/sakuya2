@@ -42,6 +42,8 @@ CREATE TABLE IF NOT EXISTS t_sales_details (
   sales_id          bigint  NOT NULL,
   detail_id         integer NOT NULL,
 
+  goods_id          integer,
+  material_id       integer,
   quantity          numeric NOT NULL,
   unit_cost         numeric NOT NULL,
   cost              numeric NOT NULL,
@@ -92,6 +94,8 @@ CREATE TABLE IF NOT EXISTS t_estimate_details (
   estimate_id       bigint  NOT NULL,
   detail_id         integer NOT NULL,
 
+  goods_id          integer,
+  material_id       integer,
   quantity          numeric NOT NULL,
   unit_cost         numeric NOT NULL,
   cost              numeric NOT NULL,
@@ -138,8 +142,8 @@ CREATE TABLE IF NOT EXISTS t_purchase_details (
   purchase_id       bigint  NOT NULL,
   detail_id         integer NOT NULL,
 
-  goods_id          serial,
-  material_id       serial,
+  goods_id          integer,
+  material_id       integer,
   quantity          numeric NOT NULL,
   unit_price        numeric NOT NULL,
   te_price          numeric NOT NULL, -- Tax Exclude

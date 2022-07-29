@@ -8,6 +8,8 @@ import Box                            from '@mui/material/Box';
 import Toolbar                        from '@mui/material/Toolbar';
 import Container                      from '@mui/material/Container';
 
+// Color
+import {palette} from 'common/color'
 
 // Proprietary Library
 import GeneralMenu from 'component/DisplayFrame/GeneralMenu';
@@ -16,7 +18,7 @@ import CopyRight   from 'component/CopyRight';
 // -----------------------------------------------------------------------------
 // Function
 // -----------------------------------------------------------------------------
-const mdTheme = createTheme({}, jaJP);
+const mdTheme = createTheme(palette, jaJP);
 
 // -----------------------------------------------------------------------------
 // Main

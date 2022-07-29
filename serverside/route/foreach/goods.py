@@ -23,28 +23,54 @@ def goods(a_goodsId=None):
   dict_queryStr = request.args;
   l_params      = [];
 
-  # - - - - - - - - - - 
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
   # Left Join
-  # - - - - - - - - - - 
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
   # Discount
   str_discount     = str(dict_queryStr.get("discount"));
   is_discount      = str_discount not in ['None', '', '0']; # 0 は、全てのカテゴリの条件指定の時
-  join_discount    = f"LEFT JOIN m_discount disc ON mg.goods_id = disc.goods_id and disc.company_id = {str_discount}" if(is_discount) else '';
-  sel_discount_jan = "COALESCE(disc.jan     , mg.jan)"
-  sel_discount_ws  = "COALESCE(disc.ws_price, mg.ws_price)"
-  sel_discount_rt  = "COALESCE(disc.rt_price, mg.rt_price)"
+  join_discount    = f"LEFT JOIN m_discount disc ON mgs.sku_id = disc.sku_id and disc.company_id = {str_discount}" if(is_discount) else '';
+  sel_discount_jan = "COALESCE(disc.jan     , mgs.jan)"
+  sel_discount_ws  = "COALESCE(disc.ws_price, mgs.ws_price)"
+  sel_discount_rt  = "COALESCE(disc.rt_price, mgs.rt_price)"
 
-  # - - - - - - - - - - 
+  # SKU (DISCOUNTより後に設定すること)
+  str_notSku = str(dict_queryStr.get("not_sku"));
+  is_sku     = str_notSku in ['None', ''];
+
+  join_sku   = f'''
+  LEFT JOIN m_goods_sku       mgs ON mg.goods_id        = mgs.goods_id
+  LEFT JOIN m_goods_sku_type mgst ON mgs.goods_sku_type = mgst.goods_sku_type
+  ''' if(is_sku) else '';
+
+  sel_sku    = f'''
+    ,mgs.sku_id      as sku_id
+    ,mgs.model_no    as model_no
+    ,{"mgs.jan"      if (not is_discount) else sel_discount_jan} as jan
+    ,mgs.unit_cost   as unit_cost
+    ,mgs.tax_rate    as tax_rate
+    ,{"mgs.ws_price" if (not is_discount) else sel_discount_ws} as ws_price
+    ,{"mgs.rt_price" if (not is_discount) else sel_discount_rt} as rt_price
+
+    -- Extra
+    ,mgs.i01_name as i01_name ,mgs.i02_name as i02_name ,mgs.i03_name as i03_name ,mgs.i04_name as i04_name ,mgs.i05_name as i05_name
+    ,mgs.n01_name as n01_name ,mgs.n02_name as n02_name ,mgs.n03_name as n03_name ,mgs.n04_name as n04_name ,mgs.n05_name as n05_name
+    ,mgs.t01_name as t01_name ,mgs.t02_name as t02_name ,mgs.t03_name as t03_name ,mgs.t04_name as t04_name ,mgs.t05_name as t05_name
+
+    -- Extra Type
+    ,mgst.i01_name as t_i01_name ,mgst.i02_name as t_i02_name ,mgst.i03_name as t_i03_name ,mgst.i04_name as t_i04_name ,mgst.i05_name as t_i05_name
+    ,mgst.n01_name as t_n01_name ,mgst.n02_name as t_n02_name ,mgst.n03_name as t_n03_name ,mgst.n04_name as t_n04_name ,mgst.n05_name as t_n05_name
+    ,mgst.t01_name as t_t01_name ,mgst.t02_name as t_t02_name ,mgst.t03_name as t_t03_name ,mgst.t04_name as t_t04_name ,mgst.t05_name as t_t05_name
+  ''' if(is_sku) else '';
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
   # Where
-  # - - - - - - - - - - 
-  # Goods Id (詳細検索の時)
-  is_gid    = a_goodsId not in [None, ''];
-  where_gid = f" AND mg.goods_id = %s" if(is_gid) else '';
-  if is_gid:
-    str_gid = str(a_goodsId);
-    l_params.append(f"{str_gid}");
-
-  # 商品名
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+  # - - - - - - - - - - - - - - - - - - 
+  # Main
+  # - - - - - - - - - - - - - - - - - - 
+  # Goods Name
   is_gname    = dict_queryStr.get('goods_name') not in [None, ''];
   where_gname = f" AND mg.name like %s" if(is_gname) else '';
   if is_gname:
@@ -65,9 +91,16 @@ def goods(a_goodsId=None):
   if is_maker:
     l_params.append(f"{str_maker}");
 
-  # - - - - - - - - - - 
+  # Goods Id (詳細検索の時)
+  is_goodsId    = a_goodsId not in [None, ''];
+  where_goodsId = f" AND mg.goods_id = %s" if(is_goodsId) else '';
+  if is_goodsId:
+    str_goodsId = str(a_goodsId);
+    l_params.append(f"{str_goodsId}");
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
   # Limit
-  # - - - - - - - - - - 
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
   is_limit = dict_queryStr.get('limit') not in [None, ''];
   limit    = f'limit %s' if(is_limit) else '';
   if is_limit: l_params.append(str(dict_queryStr["limit"]));
@@ -76,49 +109,47 @@ def goods(a_goodsId=None):
   # Query String
   # - - - - - - - - - - 
   str_query = f'''
+  -- ---------------------------------------------------------------
   SELECT
+    -- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     -- Main
+    -- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
      mg.goods_id     as goods_id
-    ,mg.model_no     as model_no
-    ,{"mg.jan"      if (not is_discount) else sel_discount_jan} as jan
     ,mg.category     as category
     ,mg.name         as name
     ,mg.maker_id     as maker_id
-    ,mg.unit_cost    as unit_cost
-    ,mg.tax_rate     as tax_rate
-    ,{"mg.ws_price" if (not is_discount) else sel_discount_ws} as ws_price
-    ,{"mg.rt_price" if (not is_discount) else sel_discount_rt} as rt_price
     ,mg.is_delete    as is_delete
     ,mg.regist_staff as regist_staff
     ,mg.regist_time  as regist_time
     ,mg.update_staff as update_staff
     ,mg.update_time  as update_time
 
-    -- Outer Join
+    -- Outer Table
     ,cat.name   as category_name
     ,maker.name as maker_name
 
-    -- Extra
-    ,mge.i01_name as i01_name ,mge.i02_name as i02_name ,mge.i03_name as i03_name ,mge.i04_name as i04_name ,mge.i05_name as i05_name
-    ,mge.n01_name as n01_name ,mge.n02_name as n02_name ,mge.n03_name as n03_name ,mge.n04_name as n04_name ,mge.n05_name as n05_name
-    ,mge.t01_name as t01_name ,mge.t02_name as t02_name ,mge.t03_name as t03_name ,mge.t04_name as t04_name ,mge.t05_name as t05_name
+    -- SKU
+    {sel_sku}
 
-    -- Extra Type
-    ,mget.i01_name as t_i01_name ,mget.i02_name as t_i02_name ,mget.i03_name as t_i03_name ,mget.i04_name as t_i04_name ,mget.i05_name as t_i05_name
-    ,mget.n01_name as t_n01_name ,mget.n02_name as t_n02_name ,mget.n03_name as t_n03_name ,mget.n04_name as t_n04_name ,mget.n05_name as t_n05_name
-    ,mget.t01_name as t_t01_name ,mget.t02_name as t_t02_name ,mget.t03_name as t_t03_name ,mget.t04_name as t_t04_name ,mget.t05_name as t_t05_name
-
+  -- ---------------------------------------------------------------
   FROM m_goods mg
-    LEFT JOIN m_goods_extra       mge ON mg.goods_id          = mge.goods_id
-    LEFT JOIN m_goods_extra_type mget ON mge.goods_extra_type = mget.goods_extra_type
-    LEFT JOIN m_category          cat ON mg.category          = cat.category
-    LEFT JOIN m_company         maker ON mg.maker_id          = maker.company_id and maker.is_supplier
+    -- Main
+    LEFT JOIN m_category        cat ON mg.category        = cat.category
+    LEFT JOIN m_company       maker ON mg.maker_id        = maker.company_id and maker.is_supplier
+    -- SKU
+    {join_sku}
+    -- DISCOUNT
     {join_discount}
+
+  -- ---------------------------------------------------------------
   WHERE TRUE
-    {where_gid}
+    -- Main
     {where_gname}
     {where_category}
     {where_maker}
+    {where_goodsId}
+
+  -- ---------------------------------------------------------------
   ORDER BY goods_id
   {limit};
   '''
@@ -145,6 +176,7 @@ def goods_detail(goods_id):
   #text = data['post_text']
 
   if req_method == 'GET':
+    # TODO discount情報
     return goods(goods_id)
 
 
@@ -155,10 +187,3 @@ def goods_detail(goods_id):
 
   return make_response(jsonify(response))
 
-# ------------------------------------------------------------------------------
-# TODO Detail Data: Update
-# ------------------------------------------------------------------------------
-
-# ------------------------------------------------------------------------------
-# TODO Detail Data: Delete
-# ------------------------------------------------------------------------------

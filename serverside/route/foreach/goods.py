@@ -28,12 +28,19 @@ def goods(a_goodsId=None):
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
   # Discount
-  str_discount     = str(dict_queryStr.get("discount"));
-  is_discount      = str_discount not in ['None', '', '0']; # 0 は、全てのカテゴリの条件指定の時
-  join_discount    = f"LEFT JOIN m_discount disc ON mgs.sku_id = disc.sku_id and disc.company_id = {str_discount}" if(is_discount) else '';
-  sel_discount_jan = "COALESCE(disc.jan     , mgs.jan)"
-  sel_discount_ws  = "COALESCE(disc.ws_price, mgs.ws_price)"
-  sel_discount_rt  = "COALESCE(disc.rt_price, mgs.rt_price)"
+  str_discount       = str(dict_queryStr.get("discount"));
+  is_discount        = str_discount not in ['None', '', '0']; # 0 は、全てのカテゴリの条件指定の時
+  join_discount      = f"LEFT JOIN m_discount disc ON mgs.sku_id = disc.sku_id and disc.company_id = {str_discount}" if(is_discount) else '';
+  sel_discount_jan   = "COALESCE(disc.jan     , mgs.jan)"
+  sel_discount_ws    = "COALESCE(disc.ws_price, mgs.ws_price)"
+  sel_discount_rt    = "COALESCE(disc.rt_price, mgs.rt_price)"
+  sel_discount_extra = '''
+    ,COALESCE(disc.i01_name, mgs.i01_name) as i01_name, COALESCE(disc.i02_name, mgs.i02_name) as i02_name, COALESCE(disc.i03_name, mgs.i03_name) as i03_name, COALESCE(disc.i04_name, mgs.i04_name) as i04_name, COALESCE(disc.i05_name, mgs.i05_name) as i05_name
+    ,COALESCE(disc.n01_name, mgs.n01_name) as n01_name, COALESCE(disc.n02_name, mgs.n02_name) as n02_name, COALESCE(disc.n03_name, mgs.n03_name) as n03_name, COALESCE(disc.n04_name, mgs.n04_name) as n04_name, COALESCE(disc.n05_name, mgs.n05_name) as n05_name
+    ,COALESCE(disc.t01_name, mgs.t01_name) as t01_name, COALESCE(disc.t02_name, mgs.t02_name) as t02_name, COALESCE(disc.t03_name, mgs.t03_name) as t03_name, COALESCE(disc.t04_name, mgs.t04_name) as t04_name, COALESCE(disc.t05_name, mgs.t05_name) as t05_name
+  ''';
+
+  where_discount_isdelete = "  AND NOT COALESCE(disc.is_delete, false) " if(is_discount) else "";
 
   # SKU (DISCOUNTより後に設定すること)
   str_notSku = str(dict_queryStr.get("not_sku"));
@@ -43,6 +50,12 @@ def goods(a_goodsId=None):
   LEFT JOIN m_goods_sku       mgs ON mg.goods_id        = mgs.goods_id
   LEFT JOIN m_goods_sku_type mgst ON mgs.goods_sku_type = mgst.goods_sku_type
   ''' if(is_sku) else '';
+
+  sel_normal_extra   = '''
+    ,mgs.i01_name as i01_name ,mgs.i02_name as i02_name ,mgs.i03_name as i03_name ,mgs.i04_name as i04_name ,mgs.i05_name as i05_name
+    ,mgs.n01_name as n01_name ,mgs.n02_name as n02_name ,mgs.n03_name as n03_name ,mgs.n04_name as n04_name ,mgs.n05_name as n05_name
+    ,mgs.t01_name as t01_name ,mgs.t02_name as t02_name ,mgs.t03_name as t03_name ,mgs.t04_name as t04_name ,mgs.t05_name as t05_name
+  ''';
 
   sel_sku    = f'''
     ,mgs.sku_id      as sku_id
@@ -54,15 +67,15 @@ def goods(a_goodsId=None):
     ,{"mgs.rt_price" if (not is_discount) else sel_discount_rt} as rt_price
 
     -- Extra
-    ,mgs.i01_name as i01_name ,mgs.i02_name as i02_name ,mgs.i03_name as i03_name ,mgs.i04_name as i04_name ,mgs.i05_name as i05_name
-    ,mgs.n01_name as n01_name ,mgs.n02_name as n02_name ,mgs.n03_name as n03_name ,mgs.n04_name as n04_name ,mgs.n05_name as n05_name
-    ,mgs.t01_name as t01_name ,mgs.t02_name as t02_name ,mgs.t03_name as t03_name ,mgs.t04_name as t04_name ,mgs.t05_name as t05_name
+    {sel_normal_extra if (not is_discount) else sel_discount_extra}
 
     -- Extra Type
     ,mgst.i01_name as t_i01_name ,mgst.i02_name as t_i02_name ,mgst.i03_name as t_i03_name ,mgst.i04_name as t_i04_name ,mgst.i05_name as t_i05_name
     ,mgst.n01_name as t_n01_name ,mgst.n02_name as t_n02_name ,mgst.n03_name as t_n03_name ,mgst.n04_name as t_n04_name ,mgst.n05_name as t_n05_name
     ,mgst.t01_name as t_t01_name ,mgst.t02_name as t_t02_name ,mgst.t03_name as t_t03_name ,mgst.t04_name as t_t04_name ,mgst.t05_name as t_t05_name
   ''' if(is_sku) else '';
+
+  where_sku_isdelete = "   AND NOT mgs.is_delete " if(is_sku) else ''
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
   # Where
@@ -144,10 +157,15 @@ def goods(a_goodsId=None):
   -- ---------------------------------------------------------------
   WHERE TRUE
     -- Main
+    AND NOT mg.is_delete
     {where_gname}
     {where_category}
     {where_maker}
     {where_goodsId}
+
+    -- SKU
+    {where_sku_isdelete}
+    {where_discount_isdelete}
 
   -- ---------------------------------------------------------------
   ORDER BY goods_id

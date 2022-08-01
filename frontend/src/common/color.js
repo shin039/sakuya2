@@ -15,5 +15,11 @@ export const palette = {
       primary  : grey[900],
       secondary: grey[800],
     },
+    label: {
+      main    : grey[200],
+      mainText: grey[900],
+      odd     : grey[200],
+      even    : blueGrey[100],
+    }
   }
 }

@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS m_goods (
   name              text NOT NULL,
   maker_id          integer, -- Company Id
 
-  is_delete         boolean DEFAULT false,
+  is_delete         boolean DEFAULT false, -- Goods 単位のdeleteフラグ
   regist_staff      integer,
   regist_time       timestamp,
   update_staff      integer,
@@ -80,22 +80,25 @@ CREATE TABLE IF NOT EXISTS m_goods_sku (
   ws_price          numeric, -- WholeSale Price (Tax Exclude)
   rt_price          numeric, -- Retail    Price (Tax Exclude)
 
-  i01_name         integer,
-  i02_name         integer,
-  i03_name         integer,
-  i04_name         integer,
-  i05_name         integer,
-  n01_name         numeric,
-  n02_name         numeric,
-  n03_name         numeric,
-  n04_name         numeric,
-  n05_name         numeric,
-  t01_name         text,
-  t02_name         text,
-  t03_name         text,
-  t04_name         text,
-  t05_name         text,
+  i01_name          integer,
+  i02_name          integer,
+  i03_name          integer,
+  i04_name          integer,
+  i05_name          integer,
+  n01_name          numeric,
+  n02_name          numeric,
+  n03_name          numeric,
+  n04_name          numeric,
+  n05_name          numeric,
+  t01_name          text,
+  t02_name          text,
+  t03_name          text,
+  t04_name          text,
+  t05_name          text,
 
+  discription       text,
+
+  is_delete         boolean DEFAULT false, -- SKU単位のdeleteフラグ
   regist_staff      integer,
   regist_time       timestamp,
   update_staff      integer,
@@ -166,15 +169,36 @@ CREATE TABLE IF NOT EXISTS m_goods_material (
   goods_id          integer NOT NULL,
   sku_id            integer DEFAULT NULL, -- SKU単位の素材設定の時に使う
   material_id       integer NOT NULL, 
+  uses              text,                 -- 使用用途
   discription       text,
-  is_delete         boolean DEFAULT false,
 
+  is_delete         boolean DEFAULT false,
   regist_staff      integer,
   regist_time       timestamp,
   update_staff      integer,
   update_time       timestamp,
 
   PRIMARY KEY (goods_material_id)
+);
+
+-- ----------------------------------------------------------------------------
+-- CREATE Material Kind TABLE
+-- ----------------------------------------------------------------------------
+-- Goods Material ( Goods : Goods Material => N : N)
+--  => To Link Goods and Material
+CREATE TABLE IF NOT EXISTS m_material_kind (
+  material_kind     serial ,
+
+  name              varchar(20),
+  discription       text,
+
+  is_delete         boolean DEFAULT false,
+  regist_staff      integer,
+  regist_time       timestamp,
+  update_staff      integer,
+  update_time       timestamp,
+
+  PRIMARY KEY (material_kind)
 );
 
 -- ----------------------------------------------------------------------------
@@ -187,11 +211,12 @@ CREATE TABLE IF NOT EXISTS m_material (
   maker_id          integer, -- Company Id
 
   unit_price        numeric,
-  tax               numeric, -- For Reduced Tax Rate
+  unit              varchar(20),          -- 単位
+  tax               numeric,              -- For Reduced Tax Rate
 
+  is_use_estimate   boolean DEFAULT true, -- 見積金額で使用するかどうか
   lot               text,
   discription       text,
-  kind              integer, -- Wages: 1, Royalty: 11, Material: 100~
 
   is_delete         boolean DEFAULT false,
   regist_staff      integer,
@@ -206,6 +231,7 @@ CREATE TABLE IF NOT EXISTS m_material (
 CREATE TABLE IF NOT EXISTS m_material_type (
   material_type     serial,
   name              varchar(20),
+  material_kind     integer,
   discription       text,
 
   is_delete         boolean DEFAULT false,
@@ -272,9 +298,10 @@ CREATE TABLE IF NOT EXISTS m_company_staff (
 -- ----------------------------------------------------------------------------
 -- Companies with special discount
 CREATE TABLE IF NOT EXISTS m_discount (
+  -- require
   discount_id       serial,
-  sku_id            integer, -- m_goods_sku sku_id
-  company_id        integer,
+  sku_id            integer NOT NULL, -- m_goods_sku sku_id
+  company_id        integer NOT NULL,
 
   -- use either column
   ratio             numeric, -- Ratio of wholesale price to retail price.
@@ -284,9 +311,15 @@ CREATE TABLE IF NOT EXISTS m_discount (
   -- for duplicate jan code.
   jan               varchar(13),
 
+  -- for sku content
+  i01_name integer, i02_name integer, i03_name integer, i04_name integer, i05_name integer,
+  n01_name numeric, n02_name numeric, n03_name numeric, n04_name numeric, n05_name numeric,
+  t01_name text   , t02_name text   , t03_name text   , t04_name text   , t05_name text   ,
+  
   discription       text,
 
-  is_delete         boolean DEFAULT false,
+  is_delete         boolean DEFAULT false, -- SKU単位のDeleteフラグを上書きする
+
   regist_staff      integer,
   regist_time       timestamp,
   update_staff      integer,

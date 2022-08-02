@@ -7,7 +7,6 @@ import { useEffect, useState } from 'react';
 import {
    Box
   ,Button
-  ,Typography
   ,Modal
   ,Table
   ,TableBody
@@ -24,6 +23,7 @@ import CloseIcon from '@mui/icons-material/Close';
 // Proprietary 
 import util     from 'common/util';
 import {apiGet} from 'api'
+import Title    from 'component/Title';
 
 // -----------------------------------------------------------------------------
 // Style
@@ -46,8 +46,13 @@ const style_th      = { bgcolor: 'primary.main'  , color: 'primary.contrastText'
 const style_th_sku  = { bgcolor: 'primary.main'  , color: 'primary.contrastText' }
 const style_th_ext  = { bgcolor: 'secondary.main', color: 'primary.contrastText' }
 const style_td      = { bgcolor: 'label.main'    , color: 'label.mainText'       }
-const style_td_odd  = { bgcolor: 'label.odd'     , color: 'label.mainText'       }
-const style_td_even = { bgcolor: 'label.even'    , color: 'label.mainText'       }
+
+const style_td_odd        = { bgcolor: 'label.odd'     , color: 'label.mainText'     }
+const style_td_even       = { bgcolor: 'label.even'    , color: 'label.mainText'     }
+const style_td_odd_row2   = { bgcolor: 'label_sub.odd' , color: 'label_sub.mainText' }
+const style_td_even_row2  = { bgcolor: 'label_sub.even', color: 'label_sub.mainText' }
+const style_td_multi_odd  = { rowOne: style_td_odd , rowTwo: style_td_odd_row2  }
+const style_td_multi_even = { rowOne: style_td_even, rowTwo: style_td_even_row2 }
 
 // -----------------------------------------------------------------------------
 // Main
@@ -177,8 +182,23 @@ export default function BasicModal(props) {
 
 
   // 素材・工賃のSKU別表示を色分けするための変数 
-  const _material_skuIdInfo = {no: 0, evenOrOdd: 0};
+  const _obj_multiColor = {
+    no       : 0,
+    evenOrOdd: 0,
+    increment: no        => {_obj_multiColor.no = no; _obj_multiColor.evenOrOdd++;},
+    getColor : (is_odd) => {
+      const base_color = (is_odd)?style_td_multi_odd: style_td_multi_even;
+      return (_obj_multiColor.evenOrOdd % 2 === 1)? base_color.rowOne: base_color.rowTwo;
+    },
+    init     : ()        => {_obj_multiColor.no = 0; _obj_multiColor.evenOrOdd = 0; return true;}
+  };
 
+  const mList_common        = mList.filter((discInfo) => discInfo.sku_id <= 0);
+  const mList_sku           = mList.filter((discInfo) => discInfo.sku_id  > 0);
+
+  // ---------------------------------------------------------------------------
+  // Render
+  // ---------------------------------------------------------------------------
   return (
     <Modal
       open={open}
@@ -188,7 +208,7 @@ export default function BasicModal(props) {
     >
       <Box sx={style}>
         <Grid container direction='row' justifyContent='space-between' alignItems='center' spacing={1}>
-          <Grid item><Typography id="modal-modal-title" variant="h6" component="h2">商品詳細</Typography></Grid>
+          <Grid item><Title>商品詳細</Title></Grid>
           <Grid item><IconButton onClick={handleClose} color='secondary'><CloseIcon /></IconButton></Grid>
         </Grid>
         <br/>
@@ -211,7 +231,7 @@ export default function BasicModal(props) {
         </TableContainer>
 
         {/* ========================== SKU ========================== */}
-        <Typography variant="h6" component="h2" style={{margin:'2em 0 0.5em 0'}}>SKU 詳細</Typography>
+        <Title style={{margin:'2em 0 0.5em 0'}}>SKU 詳細</Title>
         <TableContainer component={Paper}>
           <Table sx={{ minWidth: 500 }} aria-label="simple table">
             <TableBody>
@@ -231,9 +251,9 @@ export default function BasicModal(props) {
         </TableContainer>
 
         {/* ========================== Discount ========================== */}
-        {dList && dList[0].sku_id && (
+        {dList && dList[0].sku_id && _obj_multiColor.init() && (
         <>
-          <Typography variant="h6" component="h2" style={{margin:'2em 0 0.5em 0'}}>特別設定 一覧</Typography>
+          <Title style={{margin:'2em 0 0.5em 0'}}>特別設定 一覧</Title>
           <TableContainer component={Paper}>
             <Table sx={{ minWidth: 500 }} aria-label="simple table">
               <TableBody>
@@ -243,11 +263,18 @@ export default function BasicModal(props) {
               </TableRow>
 
               {/* Content */}
-              {dList.map((discInfo, idx) => 
-                <TableRow key={`disc_${idx}`}>
-                  {get_discountColumns(discInfo).map((key, i) => (key.label)?( <TableCell key={`disc_c_${idx}_${i}`} sx={(idx%2===1)?style_td_even: style_td_odd}>{key.value}</TableCell>): '')}
-                </TableRow>
-              )}
+              {dList.map((discInfo, idx) => {
+                // 会社毎に色分けする
+                if(discInfo.company_name !== _obj_multiColor.no){
+                  _obj_multiColor.increment(discInfo.company_name);
+                }
+                const color_td = _obj_multiColor.getColor(idx%2===1);
+
+                return (<TableRow key={`disc_${idx}`}>
+                  {get_discountColumns(discInfo).map((key, i) => 
+                    (key.label)?( <TableCell key={`disc_c_${idx}_${i}`} sx={color_td}>{key.value}</TableCell>): '')}
+                </TableRow>);
+              })}
               </TableBody>
             </Table>
           </TableContainer>
@@ -257,64 +284,64 @@ export default function BasicModal(props) {
         {/* ========================== Material (Common) ========================== */}
         {mList && mList[0] && mList[0].goods_id && (
         <>
-          <Typography variant="h6" component="h2" style={{margin:'2em 0 0.5em 0'}}>素材・工賃</Typography>
-          <Typography variant="h6" component="h2" style={{margin:'0 0 0.5em 0'}}>共通</Typography>
-          <TableContainer component={Paper}>
-            <Table sx={{ minWidth: 500 }} aria-label="simple table">
-              <TableBody>
-              {/* 共通項目を先にテーブル表示する。 */}
-              {(mList.filter((discInfo) => discInfo.sku_id <= 0)).map((discInfo, idx) => 
-                (
-                <>
-                  {/* Header */}
-                  {idx === 0 &&
-                  <TableRow key={`mate_c_h_${idx}`}>
-                    {get_materialColumns(discInfo).map((key, i) => (key.label)?( <TableCell key={`mate_c_h_${idx}_${i}`} sx={key.headerCol}>{key.label}</TableCell>): '')}
-                  </TableRow>
-                  }
-                  {/* Content */}
-                  <TableRow key={`mate_c_c_${idx}`}>
-                    {get_materialColumns(discInfo).map((key, i) => (key.label)?( <TableCell key={`mate_c_c_${idx}_${i}`} sx={(idx%2===1)?style_td_even: style_td_odd}>{key.value}</TableCell>): '')}
-                  </TableRow>
-                </>
-                ))
-              }
-              </TableBody>
-            </Table>
-          </TableContainer>
+          <Title style={{margin:'2em 0 0.5em 0'}}>素材・工賃</Title>
 
-          <Typography variant="h6" component="h2" style={{margin:'1em 0 0.5em 0'}}>SKU別</Typography>
-          <TableContainer component={Paper}>
-            <Table sx={{ minWidth: 500 }} aria-label="simple table">
-              <TableBody>
-              {/* 共通項目を先にテーブル表示する。 */}
-              {(mList.filter((discInfo) => discInfo.sku_id > 0)).map((discInfo, idx) => {
-
-                if(discInfo.sku_id !== _material_skuIdInfo.no){
-                  _material_skuIdInfo.no = discInfo.sku_id;
-                  _material_skuIdInfo.evenOrOdd++;
+          {mList_common && mList_common[0] &&
+          <>
+            <Title style={{margin:'0 0 0.5em 0'}}>共通</Title>
+            <TableContainer component={Paper}>
+              <Table sx={{ minWidth: 500 }} aria-label="simple table">
+                <TableBody>
+                {/* 共通項目を先にテーブル表示する。 */}
+                {/* Header */}
+                <TableRow key={`mate_c_h`}>
+                  {get_materialColumns(mList_common[0]).map((key, i) => (key.label)?( <TableCell key={`mate_c_h_${i}`} sx={key.headerCol}>{key.label}</TableCell>): '')}
+                </TableRow>
+                {/* Content */}
+                {mList_common.map((discInfo, idx) => 
+                  (
+                    <TableRow key={`mate_c_c_${idx}`}>
+                      {get_materialColumns(discInfo).map((key, i) => (key.label)?( <TableCell key={`mate_c_c_${idx}_${i}`} sx={(idx%2===1)?style_td_even: style_td_odd}>{key.value}</TableCell>): '')}
+                    </TableRow>
+                  ))
                 }
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </>
+          }
 
-                const color_td = (_material_skuIdInfo.evenOrOdd % 2 === 1)?style_td_odd: style_td_even;
+          {mList_sku && mList_sku[0] && _obj_multiColor.init() &&
+          <>
+            <Title style={{margin:'1em 0 0.5em 0'}}>SKU別</Title>
+            <TableContainer component={Paper}>
+              <Table sx={{ minWidth: 500 }} aria-label="simple table">
+                <TableBody>
+                {/* 共通項目を先にテーブル表示する。 */}
+                {/* Header */}
+                <TableRow key={`mate_f_h`}>
+                  {get_materialColumns(mList_sku[0]).map((key, i) => (key.label)?( <TableCell key={`mate_f_h_${i}`} sx={key.headerCol}>{key.label}</TableCell>): '')}
+                </TableRow>
+                {/* Content */}
+                {mList_sku.map((discInfo, idx) => {
 
-                return (
-                <>
-                  {/* Header */}
-                  {idx === 0 &&
-                  <TableRow key={`mate_f_h_${idx}`}>
-                    {get_materialColumns(discInfo).map((key, i) => (key.label)?( <TableCell key={`mate_f_h_${idx}_${i}`} sx={key.headerCol}>{key.label}</TableCell>): '')}
-                  </TableRow>
+                  // SKU毎に色分けする
+                  if(discInfo.sku_id !== _obj_multiColor.no){
+                    _obj_multiColor.increment(discInfo.sku_id);
                   }
-                  {/* Content */}
-                  <TableRow key={`mate_f_c_${idx}`}>
-                    {get_materialColumns(discInfo).map((key, i) => (key.label)?( <TableCell key={`mate_f_c_${idx}_${i}`} sx={color_td}>{key.value}</TableCell>): '')}
-                  </TableRow>
-                </>
-                )})
-              }
-              </TableBody>
-            </Table>
-          </TableContainer>
+                  const color_td = _obj_multiColor.getColor(idx%2===1);
+
+                  return (
+                    <TableRow key={`mate_f_c_${idx}`}>
+                      {get_materialColumns(discInfo).map((key, i) => (key.label)?( <TableCell key={`mate_f_c_${idx}_${i}`} sx={color_td}>{key.value}</TableCell>): '')}
+                    </TableRow>
+                  )})
+                }
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </>
+          }
         </>
         )}
 

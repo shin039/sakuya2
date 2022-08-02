@@ -40,7 +40,7 @@ export default function Orders() {
         </TableHead>
         <TableBody>
           {st_goodsList.map((record) => (
-            <TableRow key={record.goods_id}>
+            <TableRow key={record.jan}>
               <TableCell>{record.name}</TableCell>
               <TableCell>{record.jan}</TableCell>
               <TableCell>{record.tax_rate}</TableCell>

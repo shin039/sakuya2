@@ -172,7 +172,7 @@ CREATE TABLE IF NOT EXISTS m_goods_material (
   uses              text,                 -- 使用用途
   discription       text,
 
-  is_delete         boolean DEFAULT false,
+  --is_delete         boolean DEFAULT false, -- ここは物理削除
   regist_staff      integer,
   regist_time       timestamp,
   update_staff      integer,

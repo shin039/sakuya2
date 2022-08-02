@@ -8,12 +8,17 @@ import Box                            from '@mui/material/Box';
 import Toolbar                        from '@mui/material/Toolbar';
 import Container                      from '@mui/material/Container';
 
+// react router
+import { useLocation } from 'react-router-dom';
+
 // Color
 import {palette} from 'common/color'
 
 // Proprietary Library
 import GeneralMenu from 'component/DisplayFrame/GeneralMenu';
 import CopyRight   from 'component/CopyRight';
+
+import { MENU_LIST, MENU_SECONDARY_LIST } from 'common/const';
 
 // -----------------------------------------------------------------------------
 // Function
@@ -24,7 +29,13 @@ const mdTheme = createTheme(palette, jaJP);
 // Main
 // -----------------------------------------------------------------------------
 export default function MultiPanel(args){
-  const {title, children} = args;
+  const {children} = args;
+
+  // Title 名を取得する
+  const path      = useLocation();
+  const path_list = [...MENU_LIST, ...MENU_SECONDARY_LIST];
+  const menu_info = path_list.filter((menuInfo) => `/${menuInfo.path}` === path.pathname);
+  const title     = (menu_info && menu_info[0] && menu_info[0].title) || '';
 
   return (
     <ThemeProvider theme={mdTheme}>

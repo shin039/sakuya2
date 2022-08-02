@@ -185,7 +185,7 @@ const GoodsList = () => {
   const stateSet = {st_goodsList, o_rowNum, setRowNum, open, setOpen, d_goodsId, setDGoodsId};
 
   return (
-    <DisplayFrame title='Barcode Print'>
+    <DisplayFrame>
       <Grid container spacing={3}>
 
         <Grid item xs={12}>

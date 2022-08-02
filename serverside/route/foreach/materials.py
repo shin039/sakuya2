@@ -80,6 +80,7 @@ def material(goods_id):
   WHERE TRUE
     AND NOT COALESCE( g.is_delete, false)
     AND NOT COALESCE(gs.is_delete, false)
+    AND NOT COALESCE( m.is_delete, false)
     AND m.material_id IS NOT NULL
     {where_goodsId}
   

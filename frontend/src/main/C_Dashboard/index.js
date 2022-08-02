@@ -16,7 +16,7 @@ import Orders       from './Orders';
 const Dashboard = () => {
 
   return (
-    <DisplayFrame title='Dashboard'>
+    <DisplayFrame>
       <Grid container spacing={3}>
 
         {/* Chart */}

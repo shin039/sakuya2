@@ -1,4 +1,4 @@
-import { blueGrey, orange, grey } from '@mui/material/colors';
+import { blueGrey, orange, grey, amber } from '@mui/material/colors';
 
 // Material-ui v5
 //   Style
@@ -20,6 +20,12 @@ export const palette = {
       mainText: grey[900],
       odd     : grey[200],
       even    : blueGrey[100],
-    }
+    },
+    label_sub: {
+      main    : amber[200],
+      mainText: grey[900],
+      odd     : amber[50],
+      even    : amber[100],
+    },
   }
 }

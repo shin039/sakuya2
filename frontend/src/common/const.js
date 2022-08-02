@@ -15,8 +15,8 @@ import AssignmentIcon   from '@mui/icons-material/Assignment';
 
 // Menu & Route Setting
 export const MENU_LIST = [
-  {icon: DashboardIcon   , title: 'Dashboard'    , path: 'main'    },
-  {icon: PrintIcon       , title: 'Barcode Print', path: 'barcode' },
+  {icon: DashboardIcon   , title: 'ダッシュボード'    , path: 'main'    },
+  {icon: PrintIcon       , title: 'バーコード印刷', path: 'barcode' },
 
   /*
   {icon: ShoppingCartIcon, title: 'Orders'       , path: 'main'    },
@@ -28,5 +28,5 @@ export const MENU_LIST = [
 
 // SubMenu & Route Setting
 export const MENU_SECONDARY_LIST = [
-  {icon: GoodsIcon, title: 'Goods', path: 'goods'},
+  {icon: GoodsIcon, title: '商品マスタ', path: 'goods'},
 ]

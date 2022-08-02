@@ -218,7 +218,7 @@ CREATE TABLE IF NOT EXISTS m_material (
   lot               text,
   discription       text,
 
-  is_delete         boolean DEFAULT false,
+  is_discontinued   boolean DEFAULT false, -- 廃版
   regist_staff      integer,
   regist_time       timestamp,
   update_staff      integer,

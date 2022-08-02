@@ -51,8 +51,8 @@ const search_content = (categories, makers, setGlist) => {
 
   const sel_category = (categories.length > 0)?(
     <FormControl sx={{minWidth: 150}}>
-      <InputLabel id="category_label">Category</InputLabel>
-      <Select id='category' name='category' defaultValue={0} label="Category" labelId='category_label'>
+      <InputLabel id="category_label">カテゴリー</InputLabel>
+      <Select id='category' name='category' defaultValue={0} label="カテゴリー" labelId='category_label'>
         <MenuItem value={0} key={0}>ALL</MenuItem>
         {categories.map(category => {
           return <MenuItem value={category.category} key={category.category}>{category.name}</MenuItem>}
@@ -63,8 +63,8 @@ const search_content = (categories, makers, setGlist) => {
 
   const sel_maker = (makers.length > 0)?(
     <FormControl sx={{minWidth: 150}}>
-      <InputLabel id="maker_label">Maker</InputLabel>
-      <Select id='maker' name='maker' defaultValue={0} label="Maker" labelId='maker_label'>
+      <InputLabel id="maker_label">メーカー</InputLabel>
+      <Select id='maker' name='maker' defaultValue={0} label="メーカー" labelId='maker_label'>
         <MenuItem value={0} key={0}>ALL</MenuItem>
         {makers.map( maker => {
           return <MenuItem value={maker.company_id} key={maker.company_id}>{maker.name}</MenuItem>}
@@ -73,17 +73,17 @@ const search_content = (categories, makers, setGlist) => {
     </FormControl>
   ): '';
 
-  const tf_goodsname = <TextField id="goods_name" label="Goods Name" name="goods_name" variant="outlined" error={false} />;
+  const tf_goodsname = <TextField id="goods_name" label="商品名" name="goods_name" variant="outlined" error={false} />;
 
   return (
     <>
-      <Title>Search Condition</Title>
+      <Title>検索条件</Title>
       <Box component="form" onSubmit={event => handleSubmit(event, setGlist)} noValidate sx={{ mt: 1 }}>
         <Grid container direction='row' alignItems='center' spacing={1}>
           <Grid item xs= {3}>{sel_category}</Grid>
           <Grid item xs= {3}>{sel_maker}</Grid>
           <Grid item xs= {6}>{tf_goodsname}</Grid>
-          <Grid item xs={12}><Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }} > Search </Button></Grid>
+          <Grid item xs={12}><Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }} >検　索</Button></Grid>
         </Grid>
       </Box>
     </>
@@ -124,20 +124,20 @@ const list_content = (stateSet) => {
   const status_rowNum = (! is_error)?{error: false, helperText: ''}: {error: true, helperText: `Input, ${_DISP_MIN} ～ ${_DISP_MAX}.`};
 
   const dg_columns = [
-    { field: 'category_name', headerName: 'Category', width: 200 },
-    { field: 'name'         , headerName: 'Name'    , width: 300 },
-    { field: 'maker_name'   , headerName: 'Maker'   , width: 150 },
+    { field: 'category_name', headerName: 'カテゴリー', width: 200 },
+    { field: 'name'         , headerName: '商品名'    , width: 300 },
+    { field: 'maker_name'   , headerName: 'メーカー名', width: 150 },
   ];
 
   return (
     <>
-      <Title>Goods List</Title>
+      <Title>商品リスト</Title>
 
       <DETAIL fromParent={{open, setOpen, d_goodsId}} />
 
       <Grid container direction='row' justifyContent='flex-start' alignItems='center' spacing={1} style={{marginBottom: '1em'}}>
         <Grid item xs= {2}>
-          <TextField {...status_rowNum} onChange={onChange} type='number' label='RowNum' defaultValue={i_rowNum} inputProps={{min: _DISP_MIN, max: _DISP_MAX}} size='small'/>
+          <TextField {...status_rowNum} onChange={onChange} type='number' label='表示行数' defaultValue={i_rowNum} inputProps={{min: _DISP_MIN, max: _DISP_MAX}} size='small'/>
         </Grid>
       </Grid>
       

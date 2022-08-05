@@ -30,3 +30,9 @@ export const MENU_LIST = [
 export const MENU_SECONDARY_LIST = [
   {icon: GoodsIcon, title: '商品マスタ', path: 'goods'},
 ]
+
+// No Menu
+export const MENU_NOMENU_LIST = [
+  {icon: null, title: 'アカウント設定', path: 'account'},
+]
+

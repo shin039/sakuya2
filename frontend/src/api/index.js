@@ -10,27 +10,45 @@ const _NODE_ENV = process.env.NODE_ENV;
 const _API_HOST = (_NODE_ENV === 'production')? process.env.REACT_APP_PRD_API_URL: process.env.REACT_APP_API_URL;
 
 const _DF_F_SUC = response => {log.debug(response)}
-const _DF_F_ERR = response => {
-  const response_err = (response.response && response.response.data && response.response.data.message) || null;
-  const err_msg      = response_err || response;
-  log.error(err_msg)
-}
+const _DF_F_ERR = (response, logout) => {
 
-//const _COMMON_F_ERR = (response, default_func) => {
-//  // ログイン NGの場合に処理を行う。
-//  const result = (response.response && response.response.data && response.response.data.rsult) || null;
-//  if(result === 'Login_NG'){
-//    // TODO remove Cookie... and redirect Login page. 
-//  }
-//
-//  // 既存のエラー処理を実行する。
-//  default_func(response);
-//}
+  const obj_response = response.response || null;
+
+  if(obj_response){
+
+    const {
+      /*ソフトウェア的にこちらで実装しているエラー。*/ 
+      result, message,
+      /* flaskからのエラー*/
+      msg, status
+    } = obj_response.data || {};
+  
+    // Soft Ware Error
+    if(result){
+      if( result === 'Login_NG') log.info(`ログインに失敗しました: ${message}`);
+      else                       log.error(`想定外のソフトウェアエラー: (${result}) ${message}`)
+      return;
+    }
+    
+    // Middle Ware Error
+    if(status === 401){
+      log.info(`タイムアウトしました。ログインしなおしてください。: ${msg}`);
+      logout();
+    }
+    else log.error(`想定外のミドルウェアエラー: (${status}) ${msg}`)
+    return;
+  }
+
+  log.error('想定外のエラーが発生しました。')
+  log.error(response)
+}
 
 // -----------------------------------------------------------------------------
 // API: Get Request
 // -----------------------------------------------------------------------------
-export const apiGet = ({url, o_params={}, f_success=_DF_F_SUC ,f_error=_DF_F_ERR}) => {
+export const apiGet = ({url, o_params={}, f_success=_DF_F_SUC ,f_error, f_logout= () => {}}) => {
+
+  if(! f_error) f_error = (res) => _DF_F_ERR(res, f_logout);
 
   // Make URL Parameter
   const makeParamStr = (obj) => {
@@ -50,8 +68,10 @@ export const apiGet = ({url, o_params={}, f_success=_DF_F_SUC ,f_error=_DF_F_ERR
 // -----------------------------------------------------------------------------
 // API: Post Request
 // -----------------------------------------------------------------------------
-export const apiPost = ({url, o_params={}, f_success=_DF_F_SUC ,f_error=_DF_F_ERR}) => {
+export const apiPost = ({url, o_params={}, f_success=_DF_F_SUC ,f_error, f_logout= () => {}}) => {
   const api_url  = `${_API_HOST}/${url}`;
+
+  if(! f_error) f_error = (res) => _DF_F_ERR(res, f_logout);
 
   axios.post(api_url, o_params, {withCredentials: true})
    .then ( response => f_success(response) )

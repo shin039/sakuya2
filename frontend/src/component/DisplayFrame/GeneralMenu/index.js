@@ -1,19 +1,35 @@
 // -----------------------------------------------------------------------------
 // Import
 // -----------------------------------------------------------------------------
-import  React                                from 'react';
-import { styled }                            from '@mui/material/styles';
-import MuiAppBar                             from '@mui/material/AppBar';
-import MuiDrawer                             from '@mui/material/Drawer';
-import Typography                            from '@mui/material/Typography';
-import Toolbar                               from '@mui/material/Toolbar';
-import IconButton                            from '@mui/material/IconButton';
-import ChevronLeftIcon                       from '@mui/icons-material/ChevronLeft';
-//import NotificationsIcon                     from '@mui/icons-material/Notifications';
-import Divider                               from '@mui/material/Divider';
-import List                                  from '@mui/material/List';
-import MenuIcon                              from '@mui/icons-material/Menu';
-//import Badge                                 from '@mui/material/Badge';
+import  React     from 'react';
+import { styled } from '@mui/material/styles';
+import MuiAppBar  from '@mui/material/AppBar';
+import MuiDrawer  from '@mui/material/Drawer';
+import {
+  Typography,
+  Toolbar,
+  IconButton,
+  Divider,
+  List,
+  Badge,
+  Menu,
+  MenuItem,
+} from '@mui/material';
+
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import MenuIcon        from '@mui/icons-material/Menu';
+import AccountCircle   from '@mui/icons-material/AccountCircle';
+
+// Context
+import { useContext }  from 'react';
+import { CTX_USER }    from 'main/route_factory';
+
+// Navigation
+import { useNavigate } from "react-router-dom"
+
+
+
+// Proprietary
 import { mainListItems, secondaryListItems } from 'component/DisplayFrame/GeneralMenu/listItems';
 
 // -----------------------------------------------------------------------------
@@ -72,6 +88,16 @@ const GeneralMenu = (props) => {
 
   const {title} = props;
 
+  const {f_logout} = useContext(CTX_USER);
+  const navigate   = useNavigate();
+
+  // Account Menu Open or Close
+  const [anchorEl, setAnchorEl] = React.useState(null);
+  const acmenu_open = Boolean(anchorEl);
+  const handleClick = (event) => { setAnchorEl(event.currentTarget); };
+  const handleClose = ()      => { setAnchorEl(null); };
+
+
   return (
     <>
       {/* Head Up Menu */}
@@ -86,9 +112,29 @@ const GeneralMenu = (props) => {
           </Typography>
 
           {/* Notice */}
-          {/*
-          <IconButton color="inherit"> <Badge badgeContent={4} color="secondary"> <NotificationsIcon /> </Badge> </IconButton>
-          */}
+          <IconButton
+            color="inherit"
+            aria-controls={acmenu_open ? 'account-menu' : undefined}
+            aria-haspopup="true"
+            aria-expanded={acmenu_open ? 'true' : undefined}
+            onClick={handleClick}
+          >
+            <Badge badgeContent={0} color="secondary">
+              <AccountCircle />
+            </Badge>
+          </IconButton>
+           <Menu
+              id="account-menu"
+              aria-labelledby="demo-positioned-button"
+              anchorEl={anchorEl}
+              open={acmenu_open}
+              onClose={handleClose}
+              anchorOrigin={{ vertical: 'bottom', horizontal: 'right', }}
+              transformOrigin={{ vertical: 'top', horizontal: 'right', }}
+            >
+              <MenuItem onClick={()=>{handleClose();navigate('/account')}}>アカウント設定</MenuItem>
+              <MenuItem onClick={()=>{handleClose();f_logout(false)}}>ログアウト</MenuItem>
+            </Menu>
 
         </Toolbar>
       </AppBar>

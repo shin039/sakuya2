@@ -44,7 +44,7 @@ export default function SignIn() {
 
     const f_success = response => {
       // ログイン情報をコンテクストに設定
-      ctx_user.setUserInfo({userid: userid});
+      ctx_user.setUserInfo({...ctx_user.userInfo, userid: userid});
 
       // ログイン情報をCookieにも設定
       //   -> F5やURL直打ちへの対策。コンテクストはクリアされてしまうので。
@@ -100,6 +100,7 @@ export default function SignIn() {
 
             {/* Copy Right */}
             <CopyRight style={{marginTop: '2em'}} />
+
           </Box>
         </Box>
       </Container>

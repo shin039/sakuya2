@@ -6,13 +6,15 @@
 -- CREATE Staff TABLE
 -- ----------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS m_staff (
-  staff_id serial,
-  userid   varchar(20) NOT NULL, -- For Login (Uniqueue)
-  passwd   text        NOT NULL, -- For Login
-  name     text        NOT NULL,
-  birthday date        NOT NULL,
-  tel      varchar(15),
-  mail     varchar(30),
+  staff_id          serial,
+  userid            varchar(20) NOT NULL, -- For Login (Uniqueue)
+  passwd            text        NOT NULL, -- For Login
+  name              text        NOT NULL,
+  birthday          date        NOT NULL,
+  tel               varchar(15),
+  mail              varchar(30),
+
+  authority         integer,
 
   is_delete         boolean DEFAULT false,
   regist_staff      integer,

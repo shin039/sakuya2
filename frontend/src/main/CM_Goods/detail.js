@@ -25,6 +25,10 @@ import util     from 'common/util';
 import {apiGet} from 'api'
 import Title    from 'component/Title';
 
+// Context
+import { useContext }  from 'react';
+import { CTX_USER }    from 'main/route_factory';
+
 // -----------------------------------------------------------------------------
 // Style
 // -----------------------------------------------------------------------------
@@ -65,21 +69,24 @@ export default function BasicModal(props) {
   const {open, setOpen} = props.fromParent;
   const {d_goodsId}     = props.fromParent;
 
+  const {f_logout} = useContext(CTX_USER);
+
+
   const handleClose = () => setOpen(false);
 
   // d_goodsIdに変化があったときに実行
   useEffect(() => {
     if(! d_goodsId) return;
     const f_success_sku = response => setGoodsInfo((response && response.data && response.data.result) || {});
-    apiGet({url: `goods/${d_goodsId}`, f_success: f_success_sku});
+    apiGet({url: `goods/${d_goodsId}`, f_success: f_success_sku, f_logout});
 
     const f_success_discount = response => setDiscountInfo((response && response.data && response.data.result) || {});
-    apiGet({url: `discount/goods/${d_goodsId}`, f_success: f_success_discount});
+    apiGet({url: `discount/goods/${d_goodsId}`, f_success: f_success_discount, f_logout});
 
     const f_success_material = response => setMaterialInfo((response && response.data && response.data.result) || {});
-    apiGet({url: `material/goods/${d_goodsId}`, f_success: f_success_material});
+    apiGet({url: `material/goods/${d_goodsId}`, f_success: f_success_material, f_logout});
 
-  }, [d_goodsId]);
+  }, [d_goodsId, f_logout]);
 
   // 長いから省略のため。
   const gList = st_goodsList;
@@ -126,28 +133,30 @@ export default function BasicModal(props) {
     {label: '税率'            , value: skuInfo.tax_rate                  , headerCol: style_th_sku},
   ];
 
+  const chk_price = (price) => (price === null)?'': util.formatYen(price);
+
   const get_discountColumns = (discInfo) => [
-    {label: '会社名'           , value: discInfo.company_name            , headerCol: style_th_sku},
-    // {label: 'SKU ID'           , value: discInfo.sku_id                  , headerCol: style_th_sku},
-    {label: discInfo.t_t01_name, value: discInfo.t01_name                , headerCol: style_th_ext},
-    {label: discInfo.t_t02_name, value: discInfo.t02_name                , headerCol: style_th_ext},
-    {label: discInfo.t_t03_name, value: discInfo.t03_name                , headerCol: style_th_ext},
-    {label: discInfo.t_t04_name, value: discInfo.t04_name                , headerCol: style_th_ext},
-    {label: discInfo.t_t05_name, value: discInfo.t05_name                , headerCol: style_th_ext},
-    {label: discInfo.t_i01_name, value: discInfo.i01_name                , headerCol: style_th_ext},
-    {label: discInfo.t_i02_name, value: discInfo.i02_name                , headerCol: style_th_ext},
-    {label: discInfo.t_i03_name, value: discInfo.i03_name                , headerCol: style_th_ext},
-    {label: discInfo.t_i04_name, value: discInfo.i04_name                , headerCol: style_th_ext},
-    {label: discInfo.t_i05_name, value: discInfo.i05_name                , headerCol: style_th_ext},
-    {label: discInfo.t_n01_name, value: discInfo.n01_name                , headerCol: style_th_ext},
-    {label: discInfo.t_n02_name, value: discInfo.n02_name                , headerCol: style_th_ext},
-    {label: discInfo.t_n03_name, value: discInfo.n03_name                , headerCol: style_th_ext},
-    {label: discInfo.t_n04_name, value: discInfo.n04_name                , headerCol: style_th_ext},
-    {label: discInfo.t_n05_name, value: discInfo.n05_name                , headerCol: style_th_ext},
-    {label: 'JAN'              , value: discInfo.jan                     , headerCol: style_th_sku},
-    {label: '卸売価格 (税抜)'  , value: util.formatYen(discInfo.ws_price), headerCol: style_th_sku},
-    {label: '小売価格 (税抜)'  , value: util.formatYen(discInfo.rt_price), headerCol: style_th_sku},
-    {label: '税率'             , value: discInfo.tax_rate                , headerCol: style_th_sku},
+    {label: '会社名'           , value: discInfo.company_name       , headerCol: style_th_sku},
+    // {label: 'SKU ID'           , value: discInfo.sku_id             , headerCol: style_th_sku},
+    {label: discInfo.t_t01_name, value: discInfo.t01_name           , headerCol: style_th_ext},
+    {label: discInfo.t_t02_name, value: discInfo.t02_name           , headerCol: style_th_ext},
+    {label: discInfo.t_t03_name, value: discInfo.t03_name           , headerCol: style_th_ext},
+    {label: discInfo.t_t04_name, value: discInfo.t04_name           , headerCol: style_th_ext},
+    {label: discInfo.t_t05_name, value: discInfo.t05_name           , headerCol: style_th_ext},
+    {label: discInfo.t_i01_name, value: discInfo.i01_name           , headerCol: style_th_ext},
+    {label: discInfo.t_i02_name, value: discInfo.i02_name           , headerCol: style_th_ext},
+    {label: discInfo.t_i03_name, value: discInfo.i03_name           , headerCol: style_th_ext},
+    {label: discInfo.t_i04_name, value: discInfo.i04_name           , headerCol: style_th_ext},
+    {label: discInfo.t_i05_name, value: discInfo.i05_name           , headerCol: style_th_ext},
+    {label: discInfo.t_n01_name, value: discInfo.n01_name           , headerCol: style_th_ext},
+    {label: discInfo.t_n02_name, value: discInfo.n02_name           , headerCol: style_th_ext},
+    {label: discInfo.t_n03_name, value: discInfo.n03_name           , headerCol: style_th_ext},
+    {label: discInfo.t_n04_name, value: discInfo.n04_name           , headerCol: style_th_ext},
+    {label: discInfo.t_n05_name, value: discInfo.n05_name           , headerCol: style_th_ext},
+    {label: 'JAN'              , value: discInfo.jan                , headerCol: style_th_sku},
+    {label: '卸売価格 (税抜)'  , value: chk_price(discInfo.ws_price), headerCol: style_th_sku},
+    {label: '小売価格 (税抜)'  , value: chk_price(discInfo.rt_price), headerCol: style_th_sku},
+    {label: '税率'             , value: discInfo.tax_rate           , headerCol: style_th_sku},
   ];
 
   const get_materialColumns = (mateInfo) => [

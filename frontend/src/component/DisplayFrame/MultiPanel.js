@@ -18,7 +18,7 @@ import {palette} from 'common/color'
 import GeneralMenu from 'component/DisplayFrame/GeneralMenu';
 import CopyRight   from 'component/CopyRight';
 
-import { MENU_LIST, MENU_SECONDARY_LIST } from 'common/const';
+import { MENU_LIST, MENU_SECONDARY_LIST, MENU_NOMENU_LIST } from 'common/const';
 
 // -----------------------------------------------------------------------------
 // Function
@@ -33,7 +33,7 @@ export default function MultiPanel(args){
 
   // Title 名を取得する
   const path      = useLocation();
-  const path_list = [...MENU_LIST, ...MENU_SECONDARY_LIST];
+  const path_list = [...MENU_LIST, ...MENU_SECONDARY_LIST, ...MENU_NOMENU_LIST];
   const menu_info = path_list.filter((menuInfo) => `/${menuInfo.path}` === path.pathname);
   const title     = (menu_info && menu_info[0] && menu_info[0].title) || '';
 

@@ -36,3 +36,18 @@ export const MENU_NOMENU_LIST = [
   {icon: null, title: 'アカウント設定', path: 'account'},
 ]
 
+// Validation Regex
+export const REGEX_VALIDATION = {
+  // X文字以上
+  min     : min => new RegExp(`^.{${min},}$`),
+  // X文字以内
+  max     : max => new RegExp(`^.{0,${max}}$`),
+  // 英数半角記号で X文字以上
+  passwd  : min => new RegExp(`^[\x01-\x7E]{${min},}$`),
+  // YYYY/MM/DD
+  yyyymmdd: () => /^[0-9]{4}\/(0[1-9]|1[0-2])\/(0[1-9]|[12][0-9]|3[01])$/g,
+  // 市外局番ありと携帯の電話番号
+  tel     : () => /^(0(\d{1}[-(]?\d{4}|\d{2}[-(]?\d{3}|\d{3}[-(]?\d{2}|\d{4}[-(]?\d{1})[-)]?\d{4})|(0[5789]0[-(]?\d{4}[-)]?\d{4})$/,
+  // E-MAIL
+  email   : () => /^[a-zA-Z0-9_.+-]+@([a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]*\.)+[a-zA-Z]{2,}$/,
+}

@@ -19,6 +19,7 @@ bp = Blueprint('goods', __name__, url_prefix='/goods')
 @bp.route("/", methods=['GET'])
 @jwt_required()
 def goods(a_goodsId=None):
+
   # Analyze URL Parameter
   dict_queryStr = request.args;
   l_params      = [];

@@ -57,7 +57,7 @@ JWT_SECRET_KEY    = getenv('APP_JWT_SECRET_KEY')
 JWT_COOKIE_DOMAIN = getenv('APP_JWT_COOKIE_DOMAIN')
 
 app.config["JWT_SECRET_KEY"]           = JWT_SECRET_KEY
-app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(minutes=10)
+app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(minutes=30)
 app.config["JWT_TOKEN_LOCATION"]       = ['cookies']
 app.config["JWT_COOKIE_SAMESITE"]      = "Strict";
 app.config["JWT_COOKIE_SECURE"]        = False; # or False. 要検討。HTTPSの時のみCookie送信。
@@ -74,7 +74,7 @@ def refresh_expiring_jwts(response):
   try:
     exp_timestamp = get_jwt()["exp"]
     now = datetime.now(timezone.utc)
-    target_timestamp = datetime.timestamp(now + timedelta(minutes=10)) # TODO ひとまず更新時間を10分にしている。
+    target_timestamp = datetime.timestamp(now + timedelta(minutes=30)) # TODO ひとまず更新時間を10分にしている。
 
     if target_timestamp > exp_timestamp:
       access_token = create_access_token(identity=get_jwt_identity())

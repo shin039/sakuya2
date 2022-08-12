@@ -8,6 +8,10 @@ import TableRow   from '@mui/material/TableRow';
 
 import Title      from 'component/Title';
 
+// Context
+import { useContext }  from 'react';
+import { CTX_USER }    from 'main/route_factory';
+
 import {apiGet}  from 'api'
 
 
@@ -18,12 +22,13 @@ function preventDefault(event) {
 export default function Orders() {
 
   const [st_goodsList, setGoodsList] = useState([]);
+  const {f_logout} = useContext(CTX_USER);
 
   // マウント時に実行
   useEffect(() => {
     const f_success = response => setGoodsList((response && response.data && response.data.result) || []);
-    apiGet({url: 'goods', o_params: {limit: 5}, f_success});
-  }, []);
+    apiGet({url: 'goods', o_params: {limit: 5}, f_success, f_logout});
+  }, [f_logout]);
 
   return (
     <>

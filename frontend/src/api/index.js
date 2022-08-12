@@ -35,7 +35,10 @@ const _DF_F_ERR = (response, logout) => {
       log.info(`タイムアウトしました。ログインしなおしてください。: ${msg}`);
       logout();
     }
-    else log.error(`想定外のミドルウェアエラー: (${status}) ${msg}`)
+    else {
+      log.error(`想定外のミドルウェアエラー: (${status}) ${msg}`)
+      log.error(response)
+    }
     return;
   }
 

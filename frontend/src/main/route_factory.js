@@ -13,6 +13,11 @@ import { Routes, Route, Navigate, useNavigate } from "react-router-dom"
 // Cookie Management
 import { CookiesProvider, useCookies  } from "react-cookie";
 
+// Data Picker Common Conpornent
+import { AdapterDayjs }         from '@mui/x-date-pickers/AdapterDayjs';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import jaLocale                 from 'dayjs/locale/ja';
+
 // Business Components
 import SignIn       from 'main/C_SignIn';
 import DashBoard    from 'main/C_Dashboard';
@@ -37,9 +42,12 @@ export const CTX_USER = React.createContext(_ctx_userdata);
 const USE_CONTEXT = (_logout) => {
   const [userInfo, setUserInfo] = React.useState({userid: null});
   const [snackbar, setSnackbar] = React.useState({ open: false, message : null , severity: 'info'});
+  // 子画面でsnackbarを設定したときにuseEffectが走るのを阻止したいときに使う。
+  const useEffectStop           = React.useRef(false);
   return {
     userInfo, setUserInfo,
     snackbar, setSnackbar,
+    useEffectStop: useEffectStop,
     f_logout: (is_timeout=true) => {
       if(is_timeout)setSnackbar({open:true, message: "タイムアウトしました。ログインしなおしてください。", severity: "error"});
       _logout();
@@ -69,7 +77,7 @@ const RouteFactory = (props) => {
 
   // Context
   const ctx_user = USE_CONTEXT(_logout);
-  const {snackbar, setSnackbar} = ctx_user;
+  const {snackbar, setSnackbar, useEffectStop} = ctx_user;
 
   // ---------------------------------------------------------------------------
   // Login Check
@@ -98,28 +106,33 @@ const RouteFactory = (props) => {
   return (
     <CookiesProvider>
       <CTX_USER.Provider value={ctx_user}>
-        {/* Main Drawer */}
-        <Routes>
-          {/* Main */}
-          <Route index          element={<SignIn/>                 } />
-          <Route path="main"    element={withAuth(<DashBoard/>)    } />
-          <Route path="barcode" element={withAuth(<BarcodePrint/>) } />
-          {/* Master */}
-          <Route path="account" element={withAuth(<Account/>)      } />
-          <Route path="goods"   element={withAuth(<Goods/>)        } />
-          {/* Etc */}
-          <Route path="*"       element={<Navigate to="/"/>        } />
-        </Routes>
+        {/* For DatePicker */}
+        <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale={jaLocale}>
 
-      <Snackbar
-        anchorOrigin={{vertical: 'bottom', horizontal: 'center'}}
-        open={snackbar.open}
-        autoHideDuration={6000}
-        onClose={()=>{setSnackbar({...snackbar, open: false})}}
-      >
-        <Alert severity={snackbar.severity}>{snackbar.message}</Alert>
-      </Snackbar>
+          {/* Main Route */}
+          <Routes>
+            {/* Main */}
+            <Route index          element={<SignIn/>                 } />
+            <Route path="main"    element={withAuth(<DashBoard/>)    } />
+            <Route path="barcode" element={withAuth(<BarcodePrint/>) } />
+            {/* Master */}
+            <Route path="account" element={withAuth(<Account/>)      } />
+            <Route path="goods"   element={withAuth(<Goods/>)        } />
+            {/* Etc */}
+            <Route path="*"       element={<Navigate to="/"/>        } />
+          </Routes>
 
+          {/* Common Snackbar */}
+          <Snackbar
+            anchorOrigin={{vertical: 'bottom', horizontal: 'center'}}
+            open={snackbar.open}
+            autoHideDuration={6000}
+            onClose={()=>{useEffectStop.current = true; setSnackbar({...snackbar, open: false})}}
+          >
+            <Alert severity={snackbar.severity}>{snackbar.message}</Alert>
+          </Snackbar>
+
+        </LocalizationProvider>
       </CTX_USER.Provider>
     </CookiesProvider>
   );

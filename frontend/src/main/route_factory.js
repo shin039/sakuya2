@@ -30,7 +30,7 @@ import Goods        from 'main/CM_Goods';
 // Context Data
 // -----------------------------------------------------------------------------
 const _ctx_userdata = {
-  userInfo   : { userid : null },
+  userInfo   : { userid : null},
   setUserInfo: () => {},
   snackbar   : { open: false, message : null , severity: 'info'},
   setSnackbar: () => {},
@@ -90,7 +90,7 @@ const RouteFactory = (props) => {
   if(ctx_user && ctx_user.userInfo && ! ctx_user.userInfo.userid){
     // Set Cookie UserInfo
     if(cookie && cookie._sakuya && cookie._sakuya.userInfo){
-       ctx_user.setUserInfo({userid: cookie._sakuya.userInfo.userid});
+       ctx_user.setUserInfo(cookie._sakuya.userInfo);
     }
   }
 

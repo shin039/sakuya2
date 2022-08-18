@@ -19,7 +19,7 @@ import {
 } from '@mui/material';
 
 // Proprietary 
-import {apiGet, apiPost}    from 'api'
+import {apiGet, apiPut}     from 'api'
 import DisplayFrame         from 'component/DisplayFrame/SinglePanel';
 import Title                from 'component/Title';
 import DatePicker           from 'component/DatePicker';
@@ -83,7 +83,7 @@ const get_form_info = (staff) => [
 // -----------------------------------------------------------------------------
 // Function
 // -----------------------------------------------------------------------------
-const handleSubmit = (event, userInfo, useEffectStop, setSnackbar, f_logout) => {
+const handleSubmit = (event, userInfo, useEffectStop, setSnackbar, f_logout, csrf_access_token) => {
   event.preventDefault();
   const data      = new FormData(event.currentTarget);
   const form_info = get_form_info({});
@@ -91,16 +91,14 @@ const handleSubmit = (event, userInfo, useEffectStop, setSnackbar, f_logout) => 
   const form_values = {};
   let   is_error    = false;
 
-  form_info.map((record) => {
+  form_info.forEach((record) => {
     const { id, is_require, reg_valid } = record;
-    const val            = data.get(id);
+    const val = data.get(id);
 
     if(is_require || _chk_existValue(val)){
       if(reg_valid.test(val)) form_values[id] = val;
       else                    is_error = true;
     }
-
-    return id; // mapを使っているので入れてるだけ。ロジックには関係ない。
   })
 
   // エラーが解消されていない
@@ -110,12 +108,10 @@ const handleSubmit = (event, userInfo, useEffectStop, setSnackbar, f_logout) => 
     return;
   }
 
-
-  // TODO 登録処理
-  console.log(`# 登録処理 画面更新停止 ${useEffectStop.current}`)
-  console.dir(form_values)
-  //const f_success = response => setGlist((response && response.data && response.data.result) || []);
-  //apiPost({url: 'staff', o_params: {limit: 1000, goods_name, category, maker, not_sku}, f_success, f_logout});
+  // 登録処理
+  // TODO 成功時
+  const f_success = response => {console.dir(response)};
+  apiPut({url: `staff/${userInfo.userid}`, o_params: form_values, f_success, f_logout});
 };
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -131,6 +127,7 @@ const AccountInfo = () => {
   const [st_staff, setStaff] = useState({error:{}});
   // Contextから値の取得
   const {userInfo, useEffectStop, setSnackbar, f_logout} = useContext(CTX_USER);
+
 
   const form_info = get_form_info(st_staff);
 

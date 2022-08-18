@@ -148,8 +148,8 @@ def goods(a_goodsId=None):
   -- ---------------------------------------------------------------
   FROM m_goods mg
     -- Main
-    LEFT JOIN m_category        cat ON mg.category        = cat.category
-    LEFT JOIN m_company       maker ON mg.maker_id        = maker.company_id and maker.is_supplier
+    LEFT JOIN m_category   cat ON mg.category = cat.category
+    LEFT JOIN m_company  maker ON mg.maker_id = maker.company_id and maker.is_supplier
     -- SKU
     {join_sku}
     -- DISCOUNT

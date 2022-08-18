@@ -74,7 +74,7 @@ def refresh_expiring_jwts(response):
   try:
     exp_timestamp = get_jwt()["exp"]
     now = datetime.now(timezone.utc)
-    target_timestamp = datetime.timestamp(now + timedelta(minutes=30)) # TODO ひとまず更新時間を10分にしている。
+    target_timestamp = datetime.timestamp(now + timedelta(minutes=30)) # NOTE: ひとまず更新時間を30分にしている。
 
     if target_timestamp > exp_timestamp:
       access_token = create_access_token(identity=get_jwt_identity())

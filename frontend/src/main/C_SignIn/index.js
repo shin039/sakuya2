@@ -43,6 +43,7 @@ export default function SignIn() {
     const password = data.get('password');
 
     const f_success = response => {
+
       // ログイン情報をコンテクストに設定
       ctx_user.setUserInfo({...ctx_user.userInfo, userid: userid});
 

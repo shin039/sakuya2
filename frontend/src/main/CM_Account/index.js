@@ -39,12 +39,13 @@ const _chk_existValue = (val) => val !== undefined && val !== null && val !== ''
 // -----------------------------------------------------------------------------
 // 画面コンポーネント
 const lbl_template = ({id, label, val}) => (<> {val} <input type="hidden" id={id} name={id} value={val || ''} /> </>);
-const tf_template  = ({id, label, val, reg_valid, err_valid}, st_staff, setStaff) => {
+const tf_template  = ({id, label, val, reg_valid, is_require, err_valid}, st_staff, setStaff) => {
   // Validation チェック
   const onChange = (event) => {
     const error   = st_staff.error;
     const val     = event.target.value;
-    const isError = (_chk_existValue(val) && ! reg_valid.test(val))
+    // 必須入力で入力がないか、入力があってバリデーションに引っかかるときはエラー。
+    const isError = (! _chk_existValue(val) && is_require) || (_chk_existValue(val) && ! reg_valid.test(val))
     error[id]     = isError;
 
     setStaff({...st_staff, [id]: val, error})
@@ -70,20 +71,19 @@ const dp_template  = ({id, label, val, err_valid}) => {
 }
 
 const get_form_info = (staff) => [
-  {label: 'ユーザID'  , id: 'userid'  , is_require: true , val: staff.userid   , template: lbl_template, reg_valid: REGEX_VALIDATION.min(1)    , err_valid: 'ユーザIDの値が不正です。'                          },
-  {label: 'パスワード', id: 'passwd'  , is_require: false, val: staff.passwd   , template: tf_template , reg_valid: REGEX_VALIDATION.passwd(8) , err_valid: 'パスワードは8桁以上の英数記号で入力してください。' },
-  {label: '名前'      , id: 'name'    , is_require: false, val: staff.name     , template: tf_template , reg_valid: REGEX_VALIDATION.max(50)   , err_valid: '名前は50文字以内で入力してください。'              },
-  {label: '誕生日'    , id: 'birthday', is_require: false, val: staff.birthday , template: dp_template , reg_valid: REGEX_VALIDATION.yyyymmdd(), err_valid: '誕生日はYYYY/MM/DD形式で入力してください。'        },
-  {label: 'TEL'       , id: 'tel'     , is_require: false, val: staff.tel      , template: tf_template , reg_valid: REGEX_VALIDATION.tel()     , err_valid: '電話番号の入力値が不正です。'                      },
-  {label: 'E-MAIL'    , id: 'mail'    , is_require: false, val: staff.mail     , template: tf_template , reg_valid: REGEX_VALIDATION.email()   , err_valid: 'メールアドレスの入力値が不正です。'                },
+  {label: 'ユーザID'  , id: 'userid'  , is_require: true , permit_blank: false, val: staff.userid   , template: lbl_template, reg_valid: REGEX_VALIDATION.min(1)    , err_valid: 'ユーザIDの値が不正です。'                          },
+  {label: 'パスワード', id: 'passwd'  , is_require: false, permit_blank: false, val: staff.passwd   , template: tf_template , reg_valid: REGEX_VALIDATION.passwd(8) , err_valid: 'パスワードは8桁以上の英数記号で入力してください。' },
+  {label: '名前'      , id: 'name'    , is_require: true , permit_blank: false, val: staff.name     , template: tf_template , reg_valid: REGEX_VALIDATION.max(50)   , err_valid: '名前は50文字以内で入力してください。'              },
+  {label: '誕生日'    , id: 'birthday', is_require: false, permit_blank: true , val: staff.birthday , template: dp_template , reg_valid: REGEX_VALIDATION.yyyymmdd(), err_valid: '誕生日はYYYY/MM/DD形式で入力してください。'        },
+  {label: 'TEL'       , id: 'tel'     , is_require: false, permit_blank: true , val: staff.tel      , template: tf_template , reg_valid: REGEX_VALIDATION.tel()     , err_valid: '電話番号の入力値が不正です。'                      },
+  {label: 'E-MAIL'    , id: 'mail'    , is_require: false, permit_blank: true , val: staff.mail     , template: tf_template , reg_valid: REGEX_VALIDATION.email()   , err_valid: 'メールアドレスの入力値が不正です。'                },
   //{label: '権限'    , value: staff.authorith},
 ];
-
 
 // -----------------------------------------------------------------------------
 // Function
 // -----------------------------------------------------------------------------
-const handleSubmit = (event, userInfo, useEffectStop, setSnackbar, f_logout, csrf_access_token) => {
+const handleSubmit = (event, userInfo, useEffectStop, commonFunc) => {
   event.preventDefault();
   const data      = new FormData(event.currentTarget);
   const form_info = get_form_info({});
@@ -92,26 +92,33 @@ const handleSubmit = (event, userInfo, useEffectStop, setSnackbar, f_logout, csr
   let   is_error    = false;
 
   form_info.forEach((record) => {
-    const { id, is_require, reg_valid } = record;
+    const { id, is_require, permit_blank, reg_valid } = record;
     const val = data.get(id);
 
-    if(is_require || _chk_existValue(val)){
+    // 登録前にバリデーションチェック
+    if(_chk_existValue(val)){
       if(reg_valid.test(val)) form_values[id] = val;
       else                    is_error = true;
+    }
+    else {
+      if(is_require) is_error = true;
+      else {
+        // 空白入力の時
+        if(permit_blank) form_values[id] = val;
+      }
     }
   })
 
   // エラーが解消されていない
   if(is_error){
     useEffectStop.current = true;
-    setSnackbar({open:true, message: "入力値にエラーがあります。", severity: "error", is_useEffect: false});
+    commonFunc.snackbar.error("入力値にエラーがあります。");
     return;
   }
 
   // 登録処理
-  // TODO 成功時
-  const f_success = response => {console.dir(response)};
-  apiPut({url: `staff/${userInfo.userid}`, o_params: form_values, f_success, f_logout});
+  const f_success = response => commonFunc.snackbar.info("更新が完了しました。");
+  apiPut({url: `staff/${userInfo.userid}`, o_params: form_values, f_success, commonFunc});
 };
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -126,7 +133,7 @@ const AccountInfo = () => {
   // State 定義
   const [st_staff, setStaff] = useState({error:{}});
   // Contextから値の取得
-  const {userInfo, useEffectStop, setSnackbar, f_logout} = useContext(CTX_USER);
+  const {userInfo, useEffectStop, commonFunc} = useContext(CTX_USER);
 
 
   const form_info = get_form_info(st_staff);
@@ -144,10 +151,10 @@ const AccountInfo = () => {
         staff_info.passwd = '';
         setStaff(staff_info);
       }
-      apiGet({url: `staff/${userInfo.userid}`, f_success: f_success_staff, f_logout});
+      apiGet({url: `staff/${userInfo.userid}`, f_success: f_success_staff, commonFunc});
     }
     else useEffectStop.current = false;
-  }, [userInfo, useEffectStop, f_logout]);
+  }, [userInfo, useEffectStop, commonFunc]);
 
 
   // Render
@@ -155,18 +162,18 @@ const AccountInfo = () => {
     <DisplayFrame>
       <Title>アカウント情報</Title>
       {/* ========================== Main ========================== */}
-      <Box component="form" onSubmit={event => handleSubmit(event, userInfo, useEffectStop, setSnackbar, f_logout)} noValidate sx={{ mt: 1 }}>
+      <Box component="form" onSubmit={event => handleSubmit(event, userInfo, useEffectStop, commonFunc)} noValidate sx={{ mt: 1 }}>
         <TableContainer component={Paper}>
           <Table sx={{ minWidth: 500 }} aria-label="simple table">
             <TableBody>
 
-            {form_info.map((key, idx) => (
+            {form_info.map((record, idx) => (
                 <TableRow
                   key={`main_${idx}`}
                   sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                 >
-                  <TableCell sx={style_th}>{key.label}</TableCell>
-                  <TableCell sx={style_td}>{key.template(key, st_staff, setStaff)}</TableCell>
+                  <TableCell sx={style_th}>{record.label}</TableCell>
+                  <TableCell sx={style_td}>{record.template(record, st_staff, setStaff)}</TableCell>
                 </TableRow>
             ))}
 

@@ -69,7 +69,7 @@ export default function BasicModal(props) {
   const {open, setOpen} = props.fromParent;
   const {d_goodsId}     = props.fromParent;
 
-  const {f_logout} = useContext(CTX_USER);
+  const {commonFunc} = useContext(CTX_USER);
 
 
   const handleClose = () => setOpen(false);
@@ -78,15 +78,15 @@ export default function BasicModal(props) {
   useEffect(() => {
     if(! d_goodsId) return;
     const f_success_sku = response => setGoodsInfo((response && response.data && response.data.result) || {});
-    apiGet({url: `goods/${d_goodsId}`, f_success: f_success_sku, f_logout});
+    apiGet({url: `goods/${d_goodsId}`, f_success: f_success_sku, commonFunc});
 
     const f_success_discount = response => setDiscountInfo((response && response.data && response.data.result) || {});
-    apiGet({url: `discount/goods/${d_goodsId}`, f_success: f_success_discount, f_logout});
+    apiGet({url: `discount/goods/${d_goodsId}`, f_success: f_success_discount, commonFunc});
 
     const f_success_material = response => setMaterialInfo((response && response.data && response.data.result) || {});
-    apiGet({url: `material/goods/${d_goodsId}`, f_success: f_success_material, f_logout});
+    apiGet({url: `material/goods/${d_goodsId}`, f_success: f_success_material, commonFunc});
 
-  }, [d_goodsId, f_logout]);
+  }, [d_goodsId, commonFunc]);
 
   // 長いから省略のため。
   const gList = st_goodsList;

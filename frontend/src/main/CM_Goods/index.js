@@ -32,7 +32,7 @@ import { CTX_USER }    from 'main/route_factory';
 // -----------------------------------------------------------------------------
 // Function
 // -----------------------------------------------------------------------------
-const handleSubmit = (event, setGlist, f_logout) => {
+const handleSubmit = (event, setGlist, commonFunc) => {
   event.preventDefault();
   const data       = new FormData(event.currentTarget);
   const goods_name = data.get('goods_name');
@@ -41,7 +41,7 @@ const handleSubmit = (event, setGlist, f_logout) => {
   const not_sku    = true;
 
   const f_success = response => setGlist((response && response.data && response.data.result) || []);
-  apiGet({url: 'goods', o_params: {goods_name, category, maker, not_sku}, f_success, f_logout});
+  apiGet({url: 'goods', o_params: {goods_name, category, maker, not_sku}, f_success, commonFunc});
 };
 
 // -----------------------------------------------------------------------------
@@ -51,7 +51,7 @@ const handleSubmit = (event, setGlist, f_logout) => {
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // 検索条件表示部
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-const search_content = (categories, makers, setGlist, f_logout) => {
+const search_content = (categories, makers, setGlist, commonFunc) => {
 
   const sel_category = (categories.length > 0)?(
     <FormControl sx={{minWidth: 150}}>
@@ -82,7 +82,7 @@ const search_content = (categories, makers, setGlist, f_logout) => {
   return (
     <>
       <Title>検索条件</Title>
-      <Box component="form" onSubmit={event => handleSubmit(event, setGlist, f_logout)} noValidate sx={{ mt: 1 }}>
+      <Box component="form" onSubmit={event => handleSubmit(event, setGlist, commonFunc)} noValidate sx={{ mt: 1 }}>
         <Grid container direction='row' alignItems='center' spacing={1}>
           <Grid item xs= {3}>{sel_category}</Grid>
           <Grid item xs= {3}>{sel_maker}</Grid>
@@ -176,7 +176,7 @@ const GoodsList = () => {
   const [open        , setOpen      ] = useState(false);
   const [d_goodsId   , setDGoodsId  ] = useState(null);
 
-  const {f_logout} = useContext(CTX_USER);
+  const {commonFunc} = useContext(CTX_USER);
 
   // マウント時に実行
   useEffect(() => {
@@ -184,9 +184,9 @@ const GoodsList = () => {
     const f_success_cat      = response => setCategories((response && response.data && response.data.result) || []);
     const f_success_maker    = response => setMakers    ((response && response.data && response.data.result) || []);
 
-    apiGet({url: 'category', f_success: f_success_cat, f_logout});
-    apiGet({url: 'company' , f_success: f_success_maker, o_params: {is_supplier: true}, f_logout});
-  }, [f_logout]);
+    apiGet({url: 'category', f_success: f_success_cat, commonFunc});
+    apiGet({url: 'company' , f_success: f_success_maker, o_params: {is_supplier: true}, commonFunc});
+  }, [commonFunc]);
 
   const stateSet = {st_goodsList, o_rowNum, setRowNum, open, setOpen, d_goodsId, setDGoodsId};
 
@@ -196,7 +196,7 @@ const GoodsList = () => {
 
         <Grid item xs={12}>
           <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column'}} >
-            {search_content(m_categories, m_makers, setGoodsList, f_logout)}
+            {search_content(m_categories, m_makers, setGoodsList, commonFunc)}
           </Paper>
         </Grid>
 

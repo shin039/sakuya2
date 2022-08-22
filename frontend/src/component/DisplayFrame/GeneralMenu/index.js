@@ -88,8 +88,8 @@ const GeneralMenu = (props) => {
 
   const {title} = props;
 
-  const {f_logout} = useContext(CTX_USER);
-  const navigate   = useNavigate();
+  const {commonFunc} = useContext(CTX_USER);
+  const navigate     = useNavigate();
 
   // Account Menu Open or Close
   const [anchorEl, setAnchorEl] = React.useState(null);
@@ -133,7 +133,7 @@ const GeneralMenu = (props) => {
               transformOrigin={{ vertical: 'top', horizontal: 'right', }}
             >
               <MenuItem onClick={()=>{handleClose();navigate('/account')}}>アカウント設定</MenuItem>
-              <MenuItem onClick={()=>{handleClose();f_logout(false)}}>ログアウト</MenuItem>
+              <MenuItem onClick={()=>{handleClose();commonFunc.f_logout(false)}}>ログアウト</MenuItem>
             </Menu>
 
         </Toolbar>

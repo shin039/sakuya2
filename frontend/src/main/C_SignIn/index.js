@@ -44,14 +44,15 @@ export default function SignIn() {
 
     const f_success = response => {
 
+      const user_info = response.data;
+
       // ログイン情報をコンテクストに設定
-      ctx_user.setUserInfo({...ctx_user.userInfo, userid: userid});
+      ctx_user.setUserInfo({...ctx_user.userInfo, ...user_info});
 
       // ログイン情報をCookieにも設定
       //   -> F5やURL直打ちへの対策。コンテクストはクリアされてしまうので。
       const cookie_val = cookie._sakuya || {};
-      cookie_val.userInfo = {...cookie_val.userInfo}
-      cookie_val.userInfo.userid = userid;
+      cookie_val.userInfo = {...cookie_val.userInfo, ...user_info}
       setCookie('_sakuya', cookie_val, {sameSite: 'Lax'});
 
       // メインページへの遷移

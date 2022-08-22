@@ -112,9 +112,9 @@ def jwt_unauthorized_token_callback(e):
 # TODO エラーハンドリングとログ出力
 @app.errorhandler(Exception)
 def exception_handler(e):
-  print(f"ERROR: {e}", file=stderr)
-  response = {'error': str(e)}
-  return make_response(jsonify(response))
+  print(f"[ERROR]: {e}", file=stderr)
+  response = {'error': str(e), 'result': 'server error', 'message': str(e)}
+  return make_response(jsonify(response)), 500
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 # Route Settings (Module Import)

@@ -41,7 +41,7 @@ export const REGEX_VALIDATION = {
   // X文字以上
   min     : min => new RegExp(`^.{${min},}$`),
   // X文字以内
-  max     : max => new RegExp(`^.{0,${max}}$`),
+  max     : max => new RegExp(`^.{0,${max}}$`), // X文字以内
   // 英数半角記号で X文字以上
   passwd  : min => new RegExp(`^[\x01-\x7E]{${min},}$`),
   // YYYY/MM/DD

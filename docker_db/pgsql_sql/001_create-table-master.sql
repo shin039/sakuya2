@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS m_staff (
   userid            varchar(20) NOT NULL, -- For Login (Uniqueue)
   passwd            text        NOT NULL, -- For Login
   name              text        NOT NULL,
-  birthday          date        NOT NULL,
+  birthday          date,
   tel               varchar(15),
   mail              varchar(30),
 

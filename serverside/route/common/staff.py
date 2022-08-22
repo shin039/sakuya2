@@ -55,48 +55,64 @@ def staff_detail(userid):
   return make_response(jsonify(response)), 500
 
 # - - - - - - - - - - - - - - - - - - 
-# PUT
+# PUT: Update
 # - - - - - - - - - - - - - - - - - - 
 def __staff_detail_put(request, userid):
-  try:
-    # 更新値の取得
-    json = request.get_json()
-    passwd   = json.get('passwd'  , None);
-    name     = json.get('name'    , None);
-    birthday = json.get('birthday', None);
-    tel      = json.get('tel'     , None);
-    mail     = json.get('mail'    , None);
 
-    # 更新SQLの生成
-    sql = f'''
-    UPDATE staff
-    SET
-      passwd       = %s
-     ,name         = %s
-     ,birthday     = %s
-     ,tel          = %s
-     ,mail         = %s
-     ,update_staff = %s
-     ,update_time  = %s
-    WHERE TRUE
-      AND userid = %s;
-    ''';
+  # PUTデータ
+  json = request.get_json()
 
-    # TODO UPDATE の仕組みを作る。
-    result   = DBManager.select('SELECT * FROM m_staff WHERE userid = %s;', (str(userid),) ) # , はtupleとして認識させるため
-    response = {'result': result}
-    return make_response(jsonify(response))
+  # 更新対象のキー
+  l_keys       = ['passwd', 'name', 'birthday', 'tel', 'mail']
+  l_parmitNull = ['birthday', 'tel', 'mail']
 
-  except Exception as e:
-    print(e)
+  # それ以外のキー
+  opeStaffId = json.get('opeStaffId', None)
+
+  # 更新値の取得
+  s_update = ''
+  l_params = []
+
+  for key in l_keys:
+    value = json.get(key, None) 
+
+    if(value != None):
+      if value == '' and key in l_parmitNull:
+        s_update += f',{key}=null';
+
+      else:
+        s_update += f',{key}=%s';
+        l_params.append(value);
+
+  # その他情報を追加
+  l_params.append(opeStaffId) # Set update_staff
+  l_params.append(userid)     # Where userid
+
+  # 最初の,は削除する。
+  s_update = s_update.replace(',', ' ', 1)
+
+  # 更新SQLの生成
+  sql = f'''
+  UPDATE m_staff
+  SET
+    {s_update}
+   ,update_staff = %s
+   ,update_time  = now()
+  WHERE TRUE
+    AND userid = %s;
+  ''';
+
+  result   = DBManager.update(sql, tuple(l_params), opeStaffId) # , はtupleとして認識させるため
+  response = {'result': result}
+  return make_response(jsonify(response))
 
 # - - - - - - - - - - - - - - - - - - 
-# GET
+# GET: Select
 # - - - - - - - - - - - - - - - - - - 
 def __staff_detail_get(userid):
   sql = '''
   SELECT
-    staff_id    
+    staff_id
    ,userid      
    ,passwd      
    ,name        
@@ -118,10 +134,6 @@ def __staff_detail_get(userid):
 
   return make_response(jsonify(response))
 
-
-# ------------------------------------------------------------------------------
-# TODO Detail Data: Update
-# ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
 # TODO Detail Data: Delete

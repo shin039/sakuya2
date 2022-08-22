@@ -24,8 +24,6 @@ def login():
   userid    = post_data['userid']
   passwd    = post_data['password']
 
-  print(f'userid: {userid}, passwd: {passwd}')
-
   # Execute Query
   result = DBManager.select('''
     SELECT
@@ -38,11 +36,20 @@ def login():
   ''', (str(userid), str(passwd)) )
 
   if len(result) > 0:
-    print(f'Login {userid}')
+    print(f' Log In {userid}')
 
     # JWT アクセストークンを作成する。
     access_token = create_access_token(identity='test_user')
-    return_val   = {"method" :request.method, "token" :access_token}
+
+    # Response
+    record   = result[0]
+    staff_id = record["staff_id"]
+    name     = record["name"]
+    return_val   = {
+      "userid"   :userid,
+      "staff_id" :staff_id,
+      "name"     : name
+    }
 
     response = make_response(return_val)
 

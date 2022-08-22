@@ -47,7 +47,7 @@ const _LIST_ROW_SIZE = 10;
 // -----------------------------------------------------------------------------
 // Function
 // -----------------------------------------------------------------------------
-const handleSubmit = (event, setGlist, f_logout) => {
+const handleSubmit = (event, setGlist, commonFunc) => {
   event.preventDefault();
   const data       = new FormData(event.currentTarget);
   const goods_name = data.get('goods_name');
@@ -56,7 +56,7 @@ const handleSubmit = (event, setGlist, f_logout) => {
   const discount   = data.get('discount');
 
   const f_success = response => setGlist((response && response.data && response.data.result) || []);
-  apiGet({url: 'goods', o_params: { goods_name, category, maker, discount}, f_success, f_logout});
+  apiGet({url: 'goods', o_params: { goods_name, category, maker, discount}, f_success, commonFunc});
 };
 
 // -----------------------------------------------------------------------------
@@ -66,7 +66,7 @@ const handleSubmit = (event, setGlist, f_logout) => {
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // 検索条件表示部
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-const search_content = (categories, makers, discounts, setGlist, f_logout) => {
+const search_content = (categories, makers, discounts, setGlist, commonFunc) => {
 
   const sel_category = (categories.length > 0)?(
     <FormControl sx={{minWidth: 150}}>
@@ -109,7 +109,7 @@ const search_content = (categories, makers, discounts, setGlist, f_logout) => {
   return (
     <>
       <Title>検索条件</Title>
-      <Box component="form" onSubmit={event => handleSubmit(event, setGlist, f_logout)} noValidate sx={{ mt: 1 }}>
+      <Box component="form" onSubmit={event => handleSubmit(event, setGlist, commonFunc)} noValidate sx={{ mt: 1 }}>
         <Grid container direction='row' alignItems='center' spacing={2}>
           <Grid item xs= {12}>{sel_discount}</Grid>
           <Grid item xs= {12}><Divider/></Grid>
@@ -340,7 +340,7 @@ const BarcodePrint = () => {
   const [m_makers    , setMakers     ] = useState([]);
   const [m_discounts    , setDiscounts     ] = useState([]); // 卸先
 
-  const {f_logout} = useContext(CTX_USER);
+  const {commonFunc} = useContext(CTX_USER);
 
   // マウント時に実行
   useEffect(() => {
@@ -349,17 +349,17 @@ const BarcodePrint = () => {
     const f_success_maker    = response => setMakers    ((response && response.data && response.data.result) || []);
     const f_success_discount = response => setDiscounts ((response && response.data && response.data.result) || []);
 
-    apiGet({url: 'category'        , f_success: f_success_cat, f_logout});
-    apiGet({url: 'company'         , f_success: f_success_maker, o_params: {is_supplier: true}, f_logout });
-    apiGet({url: 'discount/company', f_success: f_success_discount, f_logout});
-  }, [f_logout]);
+    apiGet({url: 'category'        , f_success: f_success_cat, commonFunc});
+    apiGet({url: 'company'         , f_success: f_success_maker, o_params: {is_supplier: true}, commonFunc });
+    apiGet({url: 'discount/company', f_success: f_success_discount, commonFunc});
+  }, [commonFunc]);
 
   return (
     <DisplayFrame>
       <Grid container spacing={3}>
         <Grid item xs={12}>
           <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column'}} >
-            {search_content(m_categories, m_makers, m_discounts, setGoodsList, f_logout)}
+            {search_content(m_categories, m_makers, m_discounts, setGoodsList, commonFunc)}
           </Paper>
         </Grid>
         <Grid item xs={12}>

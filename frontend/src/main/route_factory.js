@@ -29,18 +29,12 @@ import Goods        from 'main/CM_Goods';
 // -----------------------------------------------------------------------------
 // Context Data
 // -----------------------------------------------------------------------------
-const _ctx_userdata = {
-  userInfo   : { userid : null},
-  setUserInfo: () => {},
-  snackbar   : { open: false, message : null , severity: 'info'},
-  setSnackbar: () => {},
-  f_logout   : () => {},
-}
+const _ctx_userdata = {}
 
 export const CTX_USER = React.createContext(_ctx_userdata);
 
 const USE_CONTEXT = (_logout) => {
-  const [userInfo, setUserInfo] = React.useState({userid: null});
+  const [userInfo, setUserInfo] = React.useState({});
   const [snackbar, setSnackbar] = React.useState({ open: false, message : null , severity: 'info'});
   // 子画面でsnackbarを設定したときにuseEffectが走るのを阻止したいときに使う。
   const useEffectStop           = React.useRef(false);
@@ -48,9 +42,17 @@ const USE_CONTEXT = (_logout) => {
     userInfo, setUserInfo,
     snackbar, setSnackbar,
     useEffectStop: useEffectStop,
-    f_logout: (is_timeout=true) => {
-      if(is_timeout)setSnackbar({open:true, message: "タイムアウトしました。ログインしなおしてください。", severity: "error"});
-      _logout();
+    commonFunc   : {
+      getUserInfo: () => userInfo,
+      snackbar: {
+        info : (msg) => setSnackbar({open:true, message: msg, severity: "info" , is_useEffect: false}),
+        error: (msg) => setSnackbar({open:true, message: msg, severity: "error", is_useEffect: false})
+      },
+      
+      f_logout: (is_timeout=true) => {
+        if(is_timeout)setSnackbar({open:true, message: "タイムアウトしました。ログインしなおしてください。", severity: "error"});
+        _logout();
+      }
     }
   };
 }

@@ -22,13 +22,13 @@ function preventDefault(event) {
 export default function Orders() {
 
   const [st_goodsList, setGoodsList] = useState([]);
-  const {f_logout} = useContext(CTX_USER);
+  const {commonFunc} = useContext(CTX_USER);
 
   // マウント時に実行
   useEffect(() => {
     const f_success = response => setGoodsList((response && response.data && response.data.result) || []);
-    apiGet({url: 'goods', o_params: {limit: 5}, f_success, f_logout});
-  }, [f_logout]);
+    apiGet({url: 'goods', o_params: {limit: 5}, f_success, commonFunc});
+  }, [commonFunc]);
 
   return (
     <>

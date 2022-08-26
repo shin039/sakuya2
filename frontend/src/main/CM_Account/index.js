@@ -135,7 +135,6 @@ const AccountInfo = () => {
   // Contextから値の取得
   const {userInfo, useEffectStop, commonFunc} = useContext(CTX_USER);
 
-
   const form_info = get_form_info(st_staff);
 
   // マウント時に実行
@@ -168,13 +167,13 @@ const AccountInfo = () => {
             <TableBody>
 
             {form_info.map((record, idx) => (
-                <TableRow
-                  key={`main_${idx}`}
-                  sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                >
-                  <TableCell sx={style_th}>{record.label}</TableCell>
-                  <TableCell sx={style_td}>{record.template(record, st_staff, setStaff)}</TableCell>
-                </TableRow>
+              <TableRow
+                key={`main_${idx}`}
+                sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+              >
+                <TableCell sx={style_th}>{record.label}</TableCell>
+                <TableCell sx={style_td}>{record.template(record, st_staff, setStaff)}</TableCell>
+              </TableRow>
             ))}
 
             </TableBody>

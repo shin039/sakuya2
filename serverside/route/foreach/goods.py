@@ -81,6 +81,9 @@ def goods(a_goodsId=None):
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
   # Where
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+  
+
+
   # - - - - - - - - - - - - - - - - - - 
   # Main
   # - - - - - - - - - - - - - - - - - - 
@@ -98,12 +101,38 @@ def goods(a_goodsId=None):
   if is_category:
     l_params.append(f"{str_category}");
 
+  # Multi Category
+  str_m_category   = str(dict_queryStr.get("m_category"));
+  is_m_category    = str_m_category not in ['None', ''];
+  where_m_category = '';
+
+  if is_m_category:
+    mcat_params    = ''
+    arr_categories = [x.strip() for x in str_m_category.split(',')]
+    for rec_cate in arr_categories:
+      mcat_params += '%s,'
+      l_params.append(f"{rec_cate}");
+    where_m_category = f" AND mg.category in ({mcat_params.rstrip(',')})" 
+
   # Maker
   str_maker   = str(dict_queryStr.get("maker"));
-  is_maker    = str_maker not in ['None', '', '0']; # 0 は、全てのカテゴリの条件指定の時
+  is_maker    = str_maker not in ['None', '', '0']; # 0 は、全てのメーカーの条件指定の時
   where_maker = f" AND mg.maker_id = %s" if(is_maker) else '';
   if is_maker:
     l_params.append(f"{str_maker}");
+
+  # Multi Maker
+  str_m_maker   = str(dict_queryStr.get("m_maker"));
+  is_m_maker    = str_m_maker not in ['None', ''];
+  where_m_maker = '';
+
+  if is_m_maker:
+    mmaker_params  = ''
+    arr_categories = [x.strip() for x in str_m_maker.split(',')]
+    for rec_maker in arr_categories:
+      mmaker_params += '%s,'
+      l_params.append(f"{rec_maker}");
+    where_m_maker = f" AND mg.maker_id in ({mmaker_params.rstrip(',')})" 
 
   # Goods Id (詳細検索の時)
   is_goodsId    = a_goodsId not in [None, ''];
@@ -161,7 +190,9 @@ def goods(a_goodsId=None):
     AND NOT mg.is_delete
     {where_gname}
     {where_category}
+    {where_m_category}
     {where_maker}
+    {where_m_maker}
     {where_goodsId}
 
     -- SKU
@@ -187,17 +218,8 @@ def goods(a_goodsId=None):
 def goods_detail(goods_id):
   req_method = request.method
 
-  # NOTE: request オブジェクトの仕様確認
-  #print(f'DATA   => {request.get_data()}')
-  
-  # NOTE: application/jsonでjsonデータ等をもらう時。
-  #data = request.get_json()
-  #text = data['post_text']
-
   if req_method == 'GET':
-    # TODO discount情報
     return goods(goods_id)
-
 
   # DEBUG それ以外の時
   print('# Not GET Goods Detail.')

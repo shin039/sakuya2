@@ -61,7 +61,7 @@ const _DF_F_ERR = (response, {f_logout, snackbar}) => {
 //      useCookieで保持した値は旧いままになっているため、
 //      documentオブジェクトからcookieの値を参照するようにしている。
 const getCookie = (name) => {
-  if(! document) return null;
+  if(! document && ! document.cookie) return null;
 
   const cookie_list = (document.cookie.split(";")).reduce((arr_rslt, record) => {
     const [key, value] = record.split("=");

@@ -30,6 +30,7 @@ import util         from 'common/util';
 import {apiGet}     from 'api';
 import DisplayFrame from 'component/DisplayFrame/MultiPanel';
 import Title        from 'component/Title';
+import MultiSelect  from 'component/MultipleSelect';
 
 // Context
 import { useContext }  from 'react';
@@ -51,12 +52,12 @@ const handleSubmit = (event, setGlist, commonFunc) => {
   event.preventDefault();
   const data       = new FormData(event.currentTarget);
   const goods_name = data.get('goods_name');
-  const category   = data.get('category');
-  const maker      = data.get('maker');
+  const m_category = data.get('m_category');
+  const m_maker    = data.get('m_maker');
   const discount   = data.get('discount');
 
   const f_success = response => setGlist((response && response.data && response.data.result) || []);
-  apiGet({url: 'goods', o_params: { goods_name, category, maker, discount}, f_success, commonFunc});
+  apiGet({url: 'goods', o_params: { goods_name, m_category, m_maker, discount}, f_success, commonFunc});
 };
 
 // -----------------------------------------------------------------------------
@@ -71,24 +72,14 @@ const search_content = (categories, makers, discounts, setGlist, commonFunc) => 
   const sel_category = (categories.length > 0)?(
     <FormControl sx={{minWidth: 150}}>
       <InputLabel id="category_label">カテゴリー</InputLabel>
-      <Select id='category' name='category' defaultValue={0} label="カテゴリー" labelId='category_label'>
-        <MenuItem value={0} key={0}>ALL</MenuItem>
-        {categories.map(category => {
-          return <MenuItem value={category.category} key={category.category}>{category.name}</MenuItem>}
-        )}
-      </Select>
+      <MultiSelect id='m_category' name='m_category' itemInfo={{items:categories, item_key: 'category', item_name: 'name'}} label="カテゴリー" labelId='category_label'/>
     </FormControl>
   ): '';
 
   const sel_maker = (makers.length > 0)?(
     <FormControl sx={{minWidth: 150}}>
       <InputLabel id="maker_label">メーカー</InputLabel>
-      <Select id='maker' name='maker' defaultValue={0} label="メーカー" labelId='maker_label'>
-        <MenuItem value={0} key={0}>ALL</MenuItem>
-        {makers.map( maker => {
-          return <MenuItem value={maker.company_id} key={maker.company_id}>{maker.name}</MenuItem>}
-        )}
-      </Select>
+      <MultiSelect id='m_maker' name='m_maker' itemInfo={{items:makers, item_key: 'company_id', item_name: 'name'}} label="メーカー" labelId='maker_label'/>
     </FormControl>
   ): '';
 

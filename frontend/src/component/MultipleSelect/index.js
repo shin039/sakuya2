@@ -37,13 +37,13 @@ const DatePicker = (props) => {
     // isAll false -> true
     if(! st_isAll) {
       setIsAll(true);
-      setSelected([]);
-    }
-    // isAll false -> true
-    else {
-      setIsAll(false);
       const setval = items.map(record => record[item_key])
       setSelected(setval);
+    }
+    // isAll true -> false
+    else {
+      setIsAll(false);
+      setSelected([]);
     }
   }
 

@@ -245,6 +245,67 @@ CREATE TABLE IF NOT EXISTS m_material_type (
   PRIMARY KEY (material_type)
 );
 
+-- Material Details ( material : material details => 1 : 1)
+CREATE TABLE IF NOT EXISTS m_material_details (
+  material_id           integer NOT NULL,
+  material_details_type integer NOT NULL,
+
+  i01_name              integer,
+  i02_name              integer,
+  i03_name              integer,
+  i04_name              integer,
+  i05_name              integer,
+  n01_name              numeric,
+  n02_name              numeric,
+  n03_name              numeric,
+  n04_name              numeric,
+  n05_name              numeric,
+  t01_name              text,
+  t02_name              text,
+  t03_name              text,
+  t04_name              text,
+  t05_name              text,
+
+  discription           text,
+
+  regist_staff          integer,
+  regist_time           timestamp,
+  update_staff          integer,
+  update_time           timestamp,
+
+  PRIMARY KEY (material_id)
+);
+
+-- Material Details Type ( material details type : material ; materail details => N : 1 : 1)
+CREATE TABLE IF NOT EXISTS m_material_details_type (
+  material_details_type serial,
+
+  i01_name              text,
+  i02_name              text,
+  i03_name              text,
+  i04_name              text,
+  i05_name              text,
+  n01_name              text,
+  n02_name              text,
+  n03_name              text,
+  n04_name              text,
+  n05_name              text,
+  t01_name              text,
+  t02_name              text,
+  t03_name              text,
+  t04_name              text,
+  t05_name              text,
+
+  discription           text,
+
+  regist_staff          integer,
+  regist_time           timestamp,
+  update_staff          integer,
+  update_time           timestamp,
+
+  PRIMARY KEY (material_details_type)
+);
+
 -- ----------------------------------------------------------------------------
 -- CREATE Company, Company Staff TABLE
 -- ----------------------------------------------------------------------------

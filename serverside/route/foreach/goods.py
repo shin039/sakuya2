@@ -82,8 +82,6 @@ def goods(a_goodsId=None):
   # Where
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
   
-
-
   # - - - - - - - - - - - - - - - - - - 
   # Main
   # - - - - - - - - - - - - - - - - - - 
@@ -213,7 +211,7 @@ def goods(a_goodsId=None):
 # ------------------------------------------------------------------------------
 # Detail Data: Select
 # ------------------------------------------------------------------------------
-@bp.route("/<goods_id>", methods=['GET', 'POST', 'DELETE']) # PUT => IDを伴うINSERT, POST => IDを伴わないINSERT
+@bp.route("/<goods_id>", methods=['GET', 'POST', 'DELETE']) # PUT => IDを伴うINSERT UPDATE, POST => IDを伴わないINSERT UPDATE
 @jwt_required()
 def goods_detail(goods_id):
   req_method = request.method
@@ -225,6 +223,23 @@ def goods_detail(goods_id):
   print('# Not GET Goods Detail.')
   result   = DBManager.select('SELECT * FROM m_goods WHERE goods_id = %s;', (str(goods_id),) ) # , はtupleとして認識させるため
   response = {'result': result}
+
+  return make_response(jsonify(response))
+
+# ------------------------------------------------------------------------------
+# SKU Data: Select
+# ------------------------------------------------------------------------------
+@bp.route("/sku/<sku_id>", methods=['GET']) # PUT => IDを伴うINSERT UPDATE, POST => IDを伴わないINSERT UPDATE
+@jwt_required()
+def sku_detail(sku_id):
+  req_method = request.method
+
+  if req_method == 'GET':
+    return goods(sku_id)
+
+  # DEBUG それ以外の時
+  print('# Not GET Goods Detail.')
+  response = {'result': 'Method Error'}
 
   return make_response(jsonify(response))
 

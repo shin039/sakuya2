@@ -2,28 +2,17 @@
 //  Constant Definition
 // -----------------------------------------------------------------------------
 // Material-ui Iconは、from で個別で読み取らないとコンパイルがすごく重くなる。
-import DashboardIcon    from '@mui/icons-material/Dashboard';
-import PrintIcon        from '@mui/icons-material/Print';
-import GoodsIcon        from '@mui/icons-material/BusinessCenter';
-/*
-import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
-import PeopleIcon       from '@mui/icons-material/People';
-import BarChartIcon     from '@mui/icons-material/BarChart';
-import LayersIcon       from '@mui/icons-material/Layers';
-import AssignmentIcon   from '@mui/icons-material/Assignment';
-*/
+import DashboardIcon from '@mui/icons-material/Dashboard';
+import PrintIcon     from '@mui/icons-material/Print';
+import GoodsIcon     from '@mui/icons-material/BusinessCenter';
+import CalculateIcon from '@mui/icons-material/Calculate';
 
 // Menu & Route Setting
 export const MENU_LIST = [
-  {icon: DashboardIcon   , title: 'ダッシュボード'    , path: 'main'    },
-  {icon: PrintIcon       , title: 'バーコード印刷', path: 'barcode' },
-
-  /*
-  {icon: ShoppingCartIcon, title: 'Orders'       , path: 'main'    },
-  {icon: PeopleIcon      , title: 'Customers'    , path: 'main'    },
-  {icon: BarChartIcon    , title: 'Reports'      , path: 'main'    },
-  {icon: LayersIcon      , title: 'Integrations' , path: 'main'    },
-  */
+  {icon: DashboardIcon, title: 'ダッシュボード', path: 'main'        },
+  {icon: PrintIcon    , title: 'バーコード印刷', path: 'barcode'     },
+  {icon: CalculateIcon, title: '請求書印刷'    , path: 'invoice'     },
+  {icon: CalculateIcon, title: '糸量計算'      , path: 'yarn_ammount'},
 ]
 
 // SubMenu & Route Setting

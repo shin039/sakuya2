@@ -22,6 +22,7 @@ import jaLocale                 from 'dayjs/locale/ja';
 import SignIn       from 'main/C_SignIn';
 import DashBoard    from 'main/C_Dashboard';
 import BarcodePrint from 'main/F_BarcodePrint';
+import YarnAmount   from 'main/F_YarnAmount';
 
 import Account      from 'main/CM_Account';
 import Goods        from 'main/CM_Goods';
@@ -117,6 +118,7 @@ const RouteFactory = (props) => {
             <Route index          element={<SignIn/>                 } />
             <Route path="main"    element={withAuth(<DashBoard/>)    } />
             <Route path="barcode" element={withAuth(<BarcodePrint/>) } />
+            <Route path="yarn_ammount" element={withAuth(<YarnAmount/>) } />
             {/* Master */}
             <Route path="account" element={withAuth(<Account/>)      } />
             <Route path="goods"   element={withAuth(<Goods/>)        } />
